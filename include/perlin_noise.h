@@ -1,0 +1,1 @@
+double get_height(int x, int scale);

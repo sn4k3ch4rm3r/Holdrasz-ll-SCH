@@ -1,0 +1,1 @@
+void Game_start(SDL_Renderer *renderer);

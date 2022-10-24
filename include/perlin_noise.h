@@ -1,1 +1,1 @@
-double get_height(int x, int scale);
+double noise(int x, int scale);

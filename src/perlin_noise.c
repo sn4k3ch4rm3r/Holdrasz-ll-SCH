@@ -6,7 +6,7 @@ double pseudo_random(int x) {
 	return 2 * (((a*a*a) % 2038074743) / 2038074743.0 - 0.5);
 }
 
-double get_height(int x, int scale) {
+double noise(int x, int scale) {
 	double p = x / (double)scale;
 	
 	double d1 = p - floor(p);

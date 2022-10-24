@@ -1,1 +1,1 @@
-void Game_start(SDL_Renderer *renderer);
+void game_loop(SDL_Renderer *renderer);

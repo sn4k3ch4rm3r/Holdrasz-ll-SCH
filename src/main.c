@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
 	}
 	SDL_RenderClear(renderer);
 
-	Game_start(renderer);
+	game_loop(renderer);
 
 	SDL_Quit();
 

@@ -1,3 +1,6 @@
+#ifndef VECTOR_H
+#define VECTOR_H
+
 typedef struct Vector2 {
 	double x;
 	double y;
@@ -10,3 +13,5 @@ Vector2 V_multiply(Vector2 v1, Vector2 v2);
 Vector2 V_divide_const(Vector2 v, double c);
 double V_len(Vector2 v);
 Vector2 V_normalize(Vector2 v);
+
+#endif

@@ -1,7 +1,6 @@
-#include "vector.h"
+#include <SDL.h>
+#include <SDL2_gfxPrimitives.h>
+#include <math.h>
 
-typedef struct Lander {
-	Vector2 pos;
-	Vector2 velocity;
-	double rotation;
-} Lander;
+#include "lander.h"
+#include "vector.h"

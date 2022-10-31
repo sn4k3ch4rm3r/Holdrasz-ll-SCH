@@ -1,9 +1,5 @@
 #include <math.h>
-
-typedef struct Vector2 {
-	double x;
-	double y;
-} Vector2;
+#include "vector.h"
 
 Vector2 V_add(Vector2 v1, Vector2 v2) {
 	Vector2 res;

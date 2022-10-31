@@ -1,10 +1,14 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdbool.h>
-#include <time.h>
+#include <math.h>
 #include <SDL.h>
+#include <SDL_image.h>
 #include <SDL2_gfxPrimitives.h>
 
 #include "perlin_noise.h"
+#include "vector.h"
+#include "lander.h"
 
 double get_terrain_height(int x) {
 	return noise(x, 256) * 0.6 +
@@ -19,6 +23,7 @@ void game_loop(SDL_Renderer *renderer) {
 
 	bool is_running = true;
 	SDL_Event event;
+
 	while(is_running) {
 		while(SDL_PollEvent(&event)) {
 			switch(event.type) {
@@ -30,15 +35,16 @@ void game_loop(SDL_Renderer *renderer) {
 		
 		delta += 250 * dt;
 
-		double time = clock();
+		double time = SDL_GetPerformanceCounter();
 		SDL_SetRenderDrawColor(renderer, 0,0,0,0xff);
 		SDL_RenderClear(renderer);
 		for (int x = 1; x < 1000; x++)
 		{
 			pixelRGBA(renderer, x, 600 - get_terrain_height(x+delta)*300, 0xff, 0xff, 0xff, 0xff);
 		}
-		dt = (clock() - time) / CLOCKS_PER_SEC;
 
 		SDL_RenderPresent(renderer);
+
+		dt = (SDL_GetPerformanceCounter() - time)/SDL_GetPerformanceFrequency();
 	}
 }

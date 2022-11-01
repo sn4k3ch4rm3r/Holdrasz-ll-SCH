@@ -9,6 +9,7 @@
 #include "perlin_noise.h"
 #include "vector.h"
 #include "lander.h"
+#include "camera.h"
 
 double get_terrain_height(int x) {
 	return noise(x, 256) * 0.6 +
@@ -18,8 +19,24 @@ double get_terrain_height(int x) {
 }
 
 void game_loop(SDL_Renderer *renderer) {
-	double delta = 0;
 	double dt = 0;
+
+	Lander lander = {
+		{10, 110},
+		{100, 0},
+		-90,
+		0,
+		100,
+		1000
+	};
+
+	Camera camera = {
+		{0, 0},
+		1,
+		renderer,
+		0,
+		0
+	};
 
 	bool is_running = true;
 	SDL_Event event;
@@ -32,17 +49,22 @@ void game_loop(SDL_Renderer *renderer) {
 					break;
 			}
 		}
-		
-		delta += 250 * dt;
 
 		double time = SDL_GetPerformanceCounter();
+		int screen_width, screen_height;
+		SDL_GetRendererOutputSize(renderer, &screen_width, &screen_height);
+
+		camera.width = screen_width;
+		camera.height = screen_height;
+
 		SDL_SetRenderDrawColor(renderer, 0,0,0,0xff);
 		SDL_RenderClear(renderer);
-		for (int x = 1; x < 1000; x++)
+		for (int x = 0; x < camera.width; x++)
 		{
-			pixelRGBA(renderer, x, 600 - get_terrain_height(x+delta)*300, 0xff, 0xff, 0xff, 0xff);
+			pixelRGBA(renderer, x, get_camera_height(&camera) - get_terrain_height((x + camera.position.x)/camera.zoom)*300*camera.zoom, 0xff, 0xff, 0xff, 0xff);
 		}
 
+		render_lander(&camera, &lander);
 		SDL_RenderPresent(renderer);
 
 		dt = (SDL_GetPerformanceCounter() - time)/SDL_GetPerformanceFrequency();

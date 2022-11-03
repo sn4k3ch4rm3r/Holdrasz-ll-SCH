@@ -1,4 +1,6 @@
 #include <math.h>
+#include <SDL.h>
+
 #include "vector.h"
 
 Vector2 V_add(Vector2 v1, Vector2 v2) {
@@ -43,4 +45,13 @@ Vector2 V_normalize(Vector2 v) {
 	res.x = v.x / len;
 	res.y = v.y / len;
 	return res;
+}
+
+double V_cross_product(Vector2 v1, Vector2 v2) {
+	return v1.x * v2.y - v1.y * v2.x;
+}
+
+SDL_Point V_to_point(Vector2 v) {
+	SDL_Point p = {v.x, v.y};
+	return p;
 }

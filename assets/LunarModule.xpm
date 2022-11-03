@@ -12,16 +12,6 @@ static char *lunar_module[] = {
 "# c #D0DA91",
 "$ c #C7CFCC",
 /* pixels */
-"                                                                ",
-"                                                                ",
-"                                                                ",
-"                                                                ",
-"                                                                ",
-"                                                                ",
-"                                                                ",
-"                                                                ",
-"                                                                ",
-"                                                                ",
 "                               ++                               ",
 "                    ++        +@@+   +                          ",
 "                   +@@+      +@++@+  +                          ",
@@ -75,5 +65,15 @@ static char *lunar_module[] = {
 "  OO                      XXXXXOOXXXXX                      OO  ",
 "  OO                           OO                           OO  ",
 "OOOOOO                       OOOOOO                       OOOOOO",
-" OOOO                         OOOO                         OOOO "
+" OOOO                         OOOO                         OOOO ",
+"                                                                ",
+"                                                                ",
+"                                                                ",
+"                                                                ",
+"                                                                ",
+"                                                                ",
+"                                                                ",
+"                                                                ",
+"                                                                ",
+"                                                                "
 };

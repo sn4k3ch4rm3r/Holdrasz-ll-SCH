@@ -14,12 +14,14 @@ ifdef OS
 	INCLUDE += -I"$(SDL_INCLUDE)"
 	LIB := -L"$(MINGW_LIB)" -lmingw32 -lSDL2main -lSDL2 $(LIB) -luser32 -lgdi32 -lwinmm -ldxguid
 	MKDIR := if not exist "$(BUILDDIR)" mkdir $(BUILDDIR) & if not exist "$(OBJDIR)" mkdir "$(OBJDIR)" & if not exist "$(TARGET)" mkdir "$(TARGET)"
+	COPYASSETS := xcopy assets\ build\bin\assets\ /Y
 # Linux
 else
 	RM := rm -rf
 	INCLUDE += `sdl2-config --cflags`
-	LIB := `sdl2-config --libs` $(LIB)
+	LIB := -lm `sdl2-config --libs` $(LIB)
 	MKDIR := mkdir -p $(BUILDDIR); mkdir -p $(OBJDIR); mkdir -p $(TARGET)
+	COPYASSETS := cp assets/ build/bin/ -r -f
 endif
 
 default: CFLAGS += -O3
@@ -36,6 +38,7 @@ setupdirs:
 
 Holdraszallasch: $(OBJECTS)
 	$(CC) $(CFLAGS) -o $(TARGET)/$@ $(addprefix $(OBJDIR)/, $^) $(LIB)
+	$(COPYASSETS)
 
 clean:
 	$(RM) $(BUILDDIR)

@@ -7,8 +7,6 @@
 #include "vector.h"
 #include "camera.h"
 
-#include "LunarModule.xpm"
-
 const int dry_mass = 7000;
 const int propellant_mass = 8200;
 const int inertia_min = 800000;
@@ -34,7 +32,7 @@ Lander init_lander() {
 }
 
 void render_lander(Camera *camera, Lander *lander) {
-	SDL_Texture *texture = SDL_CreateTextureFromSurface(camera->renderer, IMG_ReadXPMFromArray(lunar_module));
+	SDL_Texture *texture = IMG_LoadTexture(camera->renderer, "assets/lander.png");
 
 	Vector2 screen_coords = get_screen_coordinates(camera, lander->position);
 	SDL_Rect dst = {screen_coords.x, screen_coords.y, size_px * camera->zoom, size_px * camera->zoom};

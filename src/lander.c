@@ -18,28 +18,38 @@ const int main_engine_fuel_rate = 136;
 const int rcs_fuel_rate = 13; 
 const Vector2 center_of_mass = {32.5, 20};
 
-Lander init_lander() {
+Lander init_lander(SDL_Renderer *renderer) {
 	Lander lander = {
-		{10, 150},
+		{10, 100},
 		{5, 0},
 		-90,
 		0,
 		dry_mass,
 		propellant_mass,
-		NO_ENGINE
+		{0},
+		IMG_LoadTexture(renderer, "assets/lunar_module.png")
 	};
 	return lander;
 }
 
-void render_lander(Camera *camera, Lander *lander) {
-	SDL_Texture *texture = IMG_LoadTexture(camera->renderer, "assets/lander.png");
+void destroy_lander(Lander *lander) {
+	SDL_DestroyTexture(lander->texture);
+}
 
+void render_lander(Camera *camera, Lander *lander) {
 	Vector2 screen_coords = get_screen_coordinates(camera, lander->position);
+	SDL_Point center = V_to_point(V_multiply_const(center_of_mass, camera->zoom));
+	SDL_Rect src = {0, 0, size_px, size_px};
 	SDL_Rect dst = {screen_coords.x, screen_coords.y, size_px * camera->zoom, size_px * camera->zoom};
 
-	SDL_Point center = V_to_point(V_multiply_const(center_of_mass, camera->zoom));
-	SDL_RenderCopyEx(camera->renderer, texture, NULL, &dst, lander->rotation, &center, SDL_FLIP_NONE);
-	SDL_DestroyTexture(texture);
+	// -1 is the lander itself
+	int render_order[] = {MAIN_ENGINE, -1, LEFT_ENGINE, RIGHT_ENGINE, ROTATE_CW, ROTATE_CCW};
+	for (int i = 0; i < 6; i++) {
+		if(render_order[i] == -1 || (lander->engines[render_order[i]] && lander->propellant > 0)) {
+			src.x = (render_order[i] + 1) * size_px;
+			SDL_RenderCopyEx(camera->renderer, lander->texture, &src, &dst, lander->rotation, &center, SDL_FLIP_NONE);
+		}
+	}
 }
 
 void update_lander(Lander *lander, double dt) {
@@ -49,11 +59,11 @@ void update_lander(Lander *lander, double dt) {
 	Vector2 force = {0, 0};
 	double torque = 0;
 	if(lander->propellant > 0) {
-		if(lander->engines & MAIN_ENGINE) {
+		if(lander->engines[MAIN_ENGINE]) {
 			force.y += main_engine_thrust;
 			lander->propellant -= main_engine_fuel_rate * dt;
 		}
-		if(lander->engines & ROTATE_CW) {
+		if(lander->engines[ROTATE_CW]) {
 			Vector2 left_rcs = {2.79, 5.86};
 			Vector2 right_rcs = {6.21, 6.86};
 
@@ -64,7 +74,7 @@ void update_lander(Lander *lander, double dt) {
 			torque += get_torque(right_rcs, right_force);
 			lander->propellant -= rcs_fuel_rate * dt;
 		}
-		if(lander->engines & ROTATE_CCW) {
+		if(lander->engines[ROTATE_CCW]) {
 			Vector2 left_rcs = {2.79, 6.86};
 			Vector2 right_rcs = {6.21, 5.86};
 
@@ -75,7 +85,7 @@ void update_lander(Lander *lander, double dt) {
 			torque += get_torque(right_rcs, right_force);
 			lander->propellant -= rcs_fuel_rate * dt;
 		}
-		if(lander->engines & LEFT_ENGINE) {
+		if(lander->engines[LEFT_ENGINE]) {
 			Vector2 rcs = {2.29, 6.36};
 			Vector2 f = {rcs_thrust, 0};
 
@@ -83,7 +93,7 @@ void update_lander(Lander *lander, double dt) {
 			force = V_add(force, f);
 			lander->propellant -= rcs_fuel_rate * dt;
 		}
-		if(lander->engines & RIGHT_ENGINE) {
+		if(lander->engines[RIGHT_ENGINE]) {
 			Vector2 rcs = {6.71, 6.36};
 			Vector2 f = {-rcs_thrust, 0};
 
@@ -109,15 +119,6 @@ void update_lander(Lander *lander, double dt) {
 	//update position
 	lander->position = V_add(lander->position, V_multiply_const(lander->velocity, dt));
 	lander->rotation += lander->angular_velocity;
-}
-
-void set_engine(Lander *lander, Engine engine, bool on) {
-	if(on) {
-		lander->engines |= engine;
-	}
-	else {
-		lander->engines &= ~engine;
-	}
 }
 
 double lander_total_mass(Lander *lander) {

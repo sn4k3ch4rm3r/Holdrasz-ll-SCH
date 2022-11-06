@@ -21,7 +21,7 @@ double get_terrain_height(int x) {
 void game_loop(SDL_Renderer *renderer) {
 	double dt = 0;
 
-	Lander lander = init_lander();
+	Lander lander = init_lander(renderer);
 	Camera camera = {
 		{0, 0},
 		1,
@@ -51,22 +51,22 @@ void game_loop(SDL_Renderer *renderer) {
 
 				case SDL_KEYDOWN:
 				case SDL_KEYUP: {
-					bool on = event.key.state == SDL_PRESSED;
+					bool state = event.key.state == SDL_PRESSED;
 					switch(event.key.keysym.sym) {
 						case SDLK_w:
-							set_engine(&lander, MAIN_ENGINE, on);
+							lander.engines[MAIN_ENGINE] = state;
 							break;
 						case SDLK_a:
-							set_engine(&lander, RIGHT_ENGINE, on);
+							lander.engines[RIGHT_ENGINE] = state;
 							break;
 						case SDLK_d:
-							set_engine(&lander, LEFT_ENGINE, on);
+							lander.engines[LEFT_ENGINE] = state;
 							break;
 						case SDLK_k:
-							set_engine(&lander, ROTATE_CW, on);
+							lander.engines[ROTATE_CW] = state;
 							break;
 						case SDLK_j:
-							set_engine(&lander, ROTATE_CCW, on);
+							lander.engines[ROTATE_CCW] = state;
 							break;
 					}
 					break;
@@ -96,4 +96,5 @@ void game_loop(SDL_Renderer *renderer) {
 
 		dt = (SDL_GetPerformanceCounter() - time)/SDL_GetPerformanceFrequency();
 	}
+	destroy_lander(&lander);
 }

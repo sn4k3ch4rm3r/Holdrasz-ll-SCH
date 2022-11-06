@@ -8,12 +8,11 @@
 
 
 typedef enum {
-	NO_ENGINE = 0,
-	MAIN_ENGINE = 1,
-	LEFT_ENGINE = 2,
-	RIGHT_ENGINE = 4,
-	ROTATE_CW = 8,
-	ROTATE_CCW = 16,
+	MAIN_ENGINE,
+	LEFT_ENGINE,
+	RIGHT_ENGINE,
+	ROTATE_CW,
+	ROTATE_CCW,
 } Engine;
 
 typedef struct Lander {
@@ -23,13 +22,14 @@ typedef struct Lander {
 	double angular_velocity;
 	double dry_mass;
 	double propellant;
-	Engine engines;
+	bool engines[5];
+	SDL_Texture *texture;
 } Lander;
 
-Lander init_lander();
+Lander init_lander(SDL_Renderer *renderer);
+void destroy_lander(Lander *lander);
 void render_lander(Camera *camera, Lander *lander);
 void update_lander(Lander *lander, double dt);
-void set_engine(Lander *lander, Engine engine, bool on);
 double get_lander_inertia(Lander *lander);
 double lander_total_mass(Lander *lander);
 double get_torque(Vector2 point, Vector2 force);

@@ -23,7 +23,8 @@ int main(int argc, char* argv[]) {
 	}
 	SDL_RenderClear(renderer);
 
-	game_loop(renderer);
+	GameState game_state = init_game(renderer);
+	game_loop(&game_state);
 
 	SDL_Quit();
 

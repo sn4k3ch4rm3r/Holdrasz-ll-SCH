@@ -13,6 +13,7 @@ typedef struct Camera {
 	double height;
 } Camera;
 
+void update_camera(Camera *camera, Vector2 lander_pos);
 double get_camera_height(Camera *camera);
 Vector2 get_screen_coordinates(Camera *camera, Vector2 world_coordinates);
 #endif

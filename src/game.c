@@ -6,6 +6,7 @@
 #include <SDL_image.h>
 #include <SDL2_gfxPrimitives.h>
 
+#include "game.h"
 #include "perlin_noise.h"
 #include "vector.h"
 #include "lander.h"
@@ -18,9 +19,7 @@ double get_terrain_height(int x) {
 		   noise(x, 32)  * 0.0625;
 }
 
-void game_loop(SDL_Renderer *renderer) {
-	double dt = 0;
-
+GameState init_game(SDL_Renderer *renderer) {
 	Lander lander = init_lander(renderer);
 	Camera camera = {
 		{0, 0},
@@ -30,71 +29,84 @@ void game_loop(SDL_Renderer *renderer) {
 		0
 	};
 
+	GameState state = {
+		lander, 
+		camera
+	};
+
+	return state;
+}
+
+void game_loop(GameState *state) {
+	double dt = 0;
 	bool is_running = true;
-	SDL_Event event;
 
 	while(is_running) {
-		//Keep camera and window size in snyc
 		double time = SDL_GetPerformanceCounter();
+		
+		//Keep camera and window size in snyc
 		int screen_width, screen_height;
-		SDL_GetRendererOutputSize(renderer, &screen_width, &screen_height);
+		SDL_GetRendererOutputSize(state->camera.renderer, &screen_width, &screen_height);
 
-		camera.width = screen_width;
-		camera.height = screen_height;
+		state->camera.width = screen_width;
+		state->camera.height = screen_height;
 
-		//Event handling
-		while(SDL_PollEvent(&event)) {
-			switch(event.type) {
-				case SDL_QUIT:
-					is_running = false;
-					break;
+		//Event
+		is_running = game_events(state);
 
-				case SDL_KEYDOWN:
-				case SDL_KEYUP: {
-					bool state = event.key.state == SDL_PRESSED;
-					switch(event.key.keysym.sym) {
-						case SDLK_w:
-							lander.engines[MAIN_ENGINE] = state;
-							break;
-						case SDLK_a:
-							lander.engines[RIGHT_ENGINE] = state;
-							break;
-						case SDLK_d:
-							lander.engines[LEFT_ENGINE] = state;
-							break;
-						case SDLK_k:
-							lander.engines[ROTATE_CW] = state;
-							break;
-						case SDLK_j:
-							lander.engines[ROTATE_CCW] = state;
-							break;
-					}
-					break;
-				}
-			}
-		}
-
-		//Update physics
-		update_lander(&lander, dt);
-
-		const int screen_buffer = 100;
-		Vector2 lander_render_pos = get_screen_coordinates(&camera, lander.position);
-		if(lander_render_pos.x > screen_width - screen_buffer - 64){
-			camera.position.x += (lander_render_pos.x - screen_width + screen_buffer + 64) / 7;
-		}
+		//Updates
+		update_lander(&state->lander, dt);
+		update_camera(&state->camera, state->lander.position);
 
 		//Rendering
-		SDL_SetRenderDrawColor(renderer, 0,0,0,0xff);
-		SDL_RenderClear(renderer);
-		for (int x = 0; x < camera.width; x++)
+		SDL_SetRenderDrawColor(state->camera.renderer, 0,0,0,0xff);
+		SDL_RenderClear(state->camera.renderer);
+		for (int x = 0; x < state->camera.width; x++)
 		{
-			pixelRGBA(renderer, x, get_camera_height(&camera) - get_terrain_height((x + camera.position.x)/camera.zoom)*300*camera.zoom, 0xff, 0xff, 0xff, 0xff);
+			pixelRGBA(state->camera.renderer, x, get_camera_height(&state->camera) - get_terrain_height((x + state->camera.position.x)/state->camera.zoom)*300*state->camera.zoom, 0xff, 0xff, 0xff, 0xff);
 		}
 
-		render_lander(&camera, &lander);
-		SDL_RenderPresent(renderer);
+		render_lander(&state->camera, &state->lander);
+		SDL_RenderPresent(state->camera.renderer);
 
 		dt = (SDL_GetPerformanceCounter() - time)/SDL_GetPerformanceFrequency();
 	}
-	destroy_lander(&lander);
+	destroy_lander(&state->lander);
+}
+
+bool game_events(Lander *lander) {
+	bool is_running = true;
+	SDL_Event event;
+
+	while(SDL_PollEvent(&event)) {
+		switch(event.type) {
+			case SDL_QUIT:
+				is_running = false;
+				break;
+
+			case SDL_KEYDOWN:
+			case SDL_KEYUP: {
+				bool engine_state = event.key.state == SDL_PRESSED;
+				switch(event.key.keysym.sym) {
+					case SDLK_w:
+						lander->engines[MAIN_ENGINE] = engine_state;
+						break;
+					case SDLK_a:
+						lander->engines[RIGHT_ENGINE] = engine_state;
+						break;
+					case SDLK_d:
+						lander->engines[LEFT_ENGINE] = engine_state;
+						break;
+					case SDLK_k:
+						lander->engines[ROTATE_CW] = engine_state;
+						break;
+					case SDLK_j:
+						lander->engines[ROTATE_CCW] = engine_state;
+						break;
+				}
+				break;
+			}
+		}
+	}
+	return is_running;
 }

@@ -6,7 +6,6 @@
 #include "vector.h"
 #include "camera.h"
 
-
 typedef enum {
 	MAIN_ENGINE,
 	LEFT_ENGINE,

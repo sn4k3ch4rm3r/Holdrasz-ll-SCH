@@ -20,8 +20,8 @@ const Vector2 center_of_mass = {32.5, 20};
 
 Lander init_lander(SDL_Renderer *renderer) {
 	Lander lander = {
-		{10, 100},
-		{5, 0},
+		{0, 60},
+		{100, 0},
 		-90,
 		0,
 		dry_mass,

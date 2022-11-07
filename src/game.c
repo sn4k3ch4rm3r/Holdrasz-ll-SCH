@@ -52,21 +52,27 @@ void game_loop(GameState *state) {
 		state->camera.height = screen_height;
 
 		//Event
-		is_running = game_events(state);
+		is_running = game_events(&state->lander);
 
 		//Updates
 		update_lander(&state->lander, dt);
-		update_camera(&state->camera, state->lander.position);
+		update_camera(&state->camera, state->lander.position, dt);
 
 		//Rendering
 		SDL_SetRenderDrawColor(state->camera.renderer, 0,0,0,0xff);
 		SDL_RenderClear(state->camera.renderer);
 		for (int x = 0; x < state->camera.width; x++)
 		{
-			pixelRGBA(state->camera.renderer, x, get_camera_height(&state->camera) - get_terrain_height((x + state->camera.position.x)/state->camera.zoom)*300*state->camera.zoom, 0xff, 0xff, 0xff, 0xff);
+			Vector2 point = {
+				x, 
+				get_terrain_height((x + state->camera.position.x)/state->camera.zoom)*50
+			};
+			Vector2 render = get_screen_coordinates(&state->camera, point);
+			pixelRGBA(state->camera.renderer, x, render.y, 0xff, 0xff, 0xff, 0xff);
 		}
 
 		render_lander(&state->camera, &state->lander);
+		pixelRGBA(state->camera.renderer, state->camera.width/2, state->camera.height/2, 0xff, 0,0,0xff);
 		SDL_RenderPresent(state->camera.renderer);
 
 		dt = (SDL_GetPerformanceCounter() - time)/SDL_GetPerformanceFrequency();

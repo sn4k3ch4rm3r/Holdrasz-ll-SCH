@@ -13,10 +13,10 @@
 #include "camera.h"
 
 double get_terrain_height(int x) {
-	return noise(x, 256) * 0.6 +
-		   noise(x, 128) * 0.25 +
-		   noise(x, 64)  * 0.125 +
-		   noise(x, 32)  * 0.0625;
+	return noise(x, 128) * 0.6 +
+		   noise(x, 64) * 0.4; //+
+		//    noise(x, 16)  * 0.125;// +
+		//    noise(x, 8)  * 0.0625;
 }
 
 GameState init_game(SDL_Renderer *renderer) {
@@ -64,15 +64,15 @@ void game_loop(GameState *state) {
 		for (int x = 0; x < state->camera.width; x++)
 		{
 			Vector2 point = {
-				x, 
-				get_terrain_height((x + state->camera.position.x)/state->camera.zoom)*50
+				x, 0
 			};
+			point = get_world_coordinates(&state->camera, point);
+			point.y = floor(get_terrain_height(floor(point.x))*50*7)/7;
 			Vector2 render = get_screen_coordinates(&state->camera, point);
-			pixelRGBA(state->camera.renderer, x, render.y, 0xff, 0xff, 0xff, 0xff);
+			lineRGBA(state->camera.renderer, x, render.y, x, state->camera.height, 0xff, 0xff, 0xff, 0xff);
 		}
 
 		render_lander(&state->camera, &state->lander);
-		pixelRGBA(state->camera.renderer, state->camera.width/2, state->camera.height/2, 0xff, 0,0,0xff);
 		SDL_RenderPresent(state->camera.renderer);
 
 		dt = (SDL_GetPerformanceCounter() - time)/SDL_GetPerformanceFrequency();

@@ -18,8 +18,8 @@ void update_camera(Camera *camera, Vector2 lander_pos, double dt) {
 		camera->height/2 - 200
 	};
 
-	Vector2 target_pos = V_subtract(lander_pos, get_world_coordinates(camera, center));
-	
+	Vector2 target_pos = V_add(camera->position, V_subtract(lander_pos, get_world_coordinates(camera, center)));
+
 	double min_height = camera->height / (pixels_per_meter * camera->zoom);
 	if(target_pos.y < min_height) {
 		target_pos.y = min_height;
@@ -39,7 +39,8 @@ void update_camera(Camera *camera, Vector2 lander_pos, double dt) {
 
 Vector2 get_world_coordinates(Camera *camera, Vector2 screen_coordinates) {
 	Vector2 world_coordinates = V_divide_const(screen_coordinates, pixels_per_meter * camera->zoom);
-	world_coordinates.y *= -1;
+	world_coordinates.y = -world_coordinates.y;
+	world_coordinates = V_add(world_coordinates, camera->position);
 	return world_coordinates;
 }
 

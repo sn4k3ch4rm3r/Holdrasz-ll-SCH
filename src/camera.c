@@ -1,7 +1,7 @@
 #include "game.h"
 #include "vector.h"
 
-const double pixels_per_meter = 7;
+const double PIXELS_PER_METER = 7;
 const int camera_speed = 5;
 
 double lerp(double a, double b, double t) {
@@ -20,7 +20,7 @@ void update_camera(Camera *camera, Vector2 lander_pos, double dt) {
 
 	Vector2 target_pos = V_add(camera->position, V_subtract(lander_pos, get_world_coordinates(camera, center)));
 
-	double min_height = camera->height / (pixels_per_meter * camera->zoom);
+	double min_height = camera->height / (PIXELS_PER_METER * camera->zoom);
 	if(target_pos.y < min_height) {
 		target_pos.y = min_height;
 	}
@@ -38,7 +38,7 @@ void update_camera(Camera *camera, Vector2 lander_pos, double dt) {
 }
 
 Vector2 get_world_coordinates(Camera *camera, Vector2 screen_coordinates) {
-	Vector2 world_coordinates = V_divide_const(screen_coordinates, pixels_per_meter * camera->zoom);
+	Vector2 world_coordinates = V_divide_const(screen_coordinates, PIXELS_PER_METER * camera->zoom);
 	world_coordinates.y = -world_coordinates.y;
 	world_coordinates = V_add(world_coordinates, camera->position);
 	return world_coordinates;
@@ -47,7 +47,7 @@ Vector2 get_world_coordinates(Camera *camera, Vector2 screen_coordinates) {
 //wc - cc = sc
 Vector2 get_screen_coordinates(Camera *camera, Vector2 world_coordinates) {
 	Vector2 screen_coordinates = V_subtract(world_coordinates, camera->position);
-	screen_coordinates = V_multiply_const(screen_coordinates, camera->zoom * pixels_per_meter);
+	screen_coordinates = V_multiply_const(screen_coordinates, camera->zoom * PIXELS_PER_METER);
 	screen_coordinates.y *= -1;
 	
 	return screen_coordinates;

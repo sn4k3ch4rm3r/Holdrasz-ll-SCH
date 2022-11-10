@@ -7,17 +7,10 @@
 #include <SDL2_gfxPrimitives.h>
 
 #include "game.h"
-#include "perlin_noise.h"
+#include "terrain.h"
 #include "vector.h"
 #include "lander.h"
 #include "camera.h"
-
-double get_terrain_height(int x) {
-	return noise(x, 128) * 0.6 +
-		   noise(x, 64) * 0.4; //+
-		//    noise(x, 16)  * 0.125;// +
-		//    noise(x, 8)  * 0.0625;
-}
 
 GameState init_game(SDL_Renderer *renderer) {
 	Lander lander = init_lander(renderer);
@@ -61,18 +54,10 @@ void game_loop(GameState *state) {
 		//Rendering
 		SDL_SetRenderDrawColor(state->camera.renderer, 0,0,0,0xff);
 		SDL_RenderClear(state->camera.renderer);
-		for (int x = 0; x < state->camera.width; x++)
-		{
-			Vector2 point = {
-				x, 0
-			};
-			point = get_world_coordinates(&state->camera, point);
-			point.y = floor(get_terrain_height(floor(point.x))*50*7)/7;
-			Vector2 render = get_screen_coordinates(&state->camera, point);
-			lineRGBA(state->camera.renderer, x, render.y, x, state->camera.height, 0xff, 0xff, 0xff, 0xff);
-		}
 
 		render_lander(&state->camera, &state->lander);
+		render_terrain(&state->camera);
+
 		SDL_RenderPresent(state->camera.renderer);
 
 		dt = (SDL_GetPerformanceCounter() - time)/SDL_GetPerformanceFrequency();

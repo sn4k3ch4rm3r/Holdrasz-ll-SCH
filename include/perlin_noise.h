@@ -1,1 +1,0 @@
-double noise(int x, int scale);

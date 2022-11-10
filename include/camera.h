@@ -13,6 +13,8 @@ typedef struct Camera {
 	double height;
 } Camera;
 
+extern const double PIXELS_PER_METER;
+
 void update_camera(Camera *camera, Vector2 lander_pos, double dt);
 Vector2 get_screen_coordinates(Camera *camera, Vector2 world_coordinates);
 Vector2 get_world_coordinates(Camera *camera, Vector2 screen_coordinates);

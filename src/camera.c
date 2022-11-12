@@ -29,7 +29,7 @@ void update_camera(Camera *camera, Vector2 lander_pos, double dt) {
 
 	camera->position = lerp2(camera->position, target_pos, camera_speed * dt);
 
-	double target_zoom = lerp(2, 0.5, (lander_pos.y - 20) / 150);
+	double target_zoom = lerp(2, 0.5, (lander_pos.y - 20) / 100);
 
 	camera->zoom = lerp(camera->zoom, target_zoom, camera_speed * dt);
 }
@@ -41,7 +41,6 @@ Vector2 get_world_coordinates(Camera *camera, Vector2 screen_coordinates) {
 	return world_coordinates;
 }
 
-//wc - cc = sc
 Vector2 get_screen_coordinates(Camera *camera, Vector2 world_coordinates) {
 	Vector2 screen_coordinates = V_subtract(world_coordinates, camera->position);
 	screen_coordinates = V_multiply_const(screen_coordinates, camera->zoom * PIXELS_PER_METER);

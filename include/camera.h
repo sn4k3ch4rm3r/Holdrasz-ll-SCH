@@ -13,9 +13,24 @@ typedef struct Camera {
 	double height;
 } Camera;
 
+/// @brief Used for converting between screen space and world space.
 extern const double PIXELS_PER_METER;
 
+/// @brief Updates the position and zoom level of the camera.
+/// @param camera The camera struct to update
+/// @param lander_pos Positoin of the lander for tracking
+/// @param dt Time in seconds since the last frame
 void update_camera(Camera *camera, Vector2 lander_pos, double dt);
+
+/// @brief Convert world coordinates to screen coordinates.
+/// @param camera The camera struct used for calculations
+/// @param world_coordinates The point to be converted
+/// @return The coordinates of the point in screen space
 Vector2 get_screen_coordinates(Camera *camera, Vector2 world_coordinates);
+
+/// @brief Convert screen coordinates to world coordinates.
+/// @param camera The camera struct used for calculations
+/// @param screen_coordinates the point to bo converted
+/// @return The coordinates of the point in world space
 Vector2 get_world_coordinates(Camera *camera, Vector2 screen_coordinates);
 #endif

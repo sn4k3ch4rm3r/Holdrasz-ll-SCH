@@ -9,7 +9,13 @@ typedef struct GameState {
 	Camera camera;
 } GameState;
 
+/// @brief Sets up the default parameters for the lander, the camera and the world.
+/// @param renderer Used for rendering the game
+/// @return GameState containing the lander and camera structs
 GameState init_game(SDL_Renderer *renderer);
+
+/// @brief Handles events, updates and rendering of the game.
+/// @param state GameState returned by init_game()
 void game_loop(GameState *state);
 
 /// @brief Handles the game events.

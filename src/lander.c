@@ -6,6 +6,7 @@
 #include "lander.h"
 #include "vector.h"
 #include "camera.h"
+#include "terrain.h"
 
 const int dry_mass = 7000;
 const int propellant_mass = 8200;
@@ -15,7 +16,9 @@ const int size_px = 64;
 const int main_engine_thrust = 45040;
 const int rcs_thrust = 20000;
 const int main_engine_fuel_rate = 136;
-const int rcs_fuel_rate = 13; 
+const int rcs_fuel_rate = 13;
+const double g = 1.62;
+const double friction_coefficient = 0.5;
 const Vector2 center_of_mass = {32.5, 20};
 
 Lander init_lander(SDL_Renderer *renderer) {
@@ -53,8 +56,6 @@ void render_lander(Camera *camera, Lander *lander) {
 }
 
 void update_lander(Lander *lander, double dt) {
-	const double g = 1.62;
-
 	//apply force
 	Vector2 force = {0, 0};
 	double torque = 0;
@@ -64,8 +65,8 @@ void update_lander(Lander *lander, double dt) {
 			lander->propellant -= main_engine_fuel_rate * dt;
 		}
 		if(lander->engines[ROTATE_CW]) {
-			Vector2 left_rcs = {2.79, 5.86};
-			Vector2 right_rcs = {6.21, 6.86};
+			Vector2 left_rcs = {20, 23};
+			Vector2 right_rcs = {43, 14};
 
 			Vector2 left_force = {0, rcs_thrust};
 			Vector2 right_force = {0, -rcs_thrust};
@@ -75,8 +76,8 @@ void update_lander(Lander *lander, double dt) {
 			lander->propellant -= rcs_fuel_rate * dt;
 		}
 		if(lander->engines[ROTATE_CCW]) {
-			Vector2 left_rcs = {2.79, 6.86};
-			Vector2 right_rcs = {6.21, 5.86};
+			Vector2 left_rcs = {20, 14};
+			Vector2 right_rcs = {43, 23};
 
 			Vector2 left_force = {0, -rcs_thrust};
 			Vector2 right_force = {0, rcs_thrust};
@@ -86,7 +87,7 @@ void update_lander(Lander *lander, double dt) {
 			lander->propellant -= rcs_fuel_rate * dt;
 		}
 		if(lander->engines[LEFT_ENGINE]) {
-			Vector2 rcs = {2.29, 6.36};
+			Vector2 rcs = {16, 19};
 			Vector2 f = {rcs_thrust, 0};
 
 			torque += get_torque(rcs, f);
@@ -94,7 +95,7 @@ void update_lander(Lander *lander, double dt) {
 			lander->propellant -= rcs_fuel_rate * dt;
 		}
 		if(lander->engines[RIGHT_ENGINE]) {
-			Vector2 rcs = {6.71, 6.36};
+			Vector2 rcs = {47, 19};
 			Vector2 f = {-rcs_thrust, 0};
 
 			torque += get_torque(rcs, f);
@@ -102,13 +103,23 @@ void update_lander(Lander *lander, double dt) {
 			lander->propellant -= rcs_fuel_rate * dt;
 		}
 	}
+	force = V_rotate(force, -lander->rotation);
 
-	Vector2 rotated_force;
-	double rotation_rad = -lander->rotation * M_PI / 180;
-	rotated_force.x = force.x * cos(rotation_rad) - force.y * sin(rotation_rad);
-	rotated_force.y = force.x * sin(rotation_rad) + force.y * cos(rotation_rad);
+	Vector2 left_leg = {2, 52};
+	Vector2 right_leg = {62, 52};
+	Vector2 impact_force;
 
-	Vector2 accelartion = V_divide_const(rotated_force, lander_total_mass(lander));
+	impact_force = get_impact_force(lander, left_leg, dt);
+	force = V_add(force, impact_force);
+	impact_force = V_rotate(impact_force, lander->rotation);
+	torque += get_torque(left_leg, impact_force) * dt;
+
+	impact_force = get_impact_force(lander, right_leg, dt);
+	force = V_add(force, impact_force);
+	impact_force = V_rotate(impact_force, lander->rotation);
+	torque += get_torque(right_leg, impact_force) * dt;
+
+	Vector2 accelartion = V_divide_const(force, lander_total_mass(lander));
 	accelartion.y -= g;
 	double angular_acceleration = (torque / get_lander_inertia(lander)) / M_PI * 180;
 
@@ -127,12 +138,39 @@ double lander_total_mass(Lander *lander) {
 
 double get_lander_inertia(Lander *lander) {
 	double max_mass = dry_mass + propellant_mass;
-	double current_mass = lander_total_mass(lander);
-	return inertia_min + (inertia_max - inertia_min) * (current_mass / max_mass);
+	return inertia_min + (inertia_max - inertia_min) * (lander_total_mass(lander) / max_mass);
+}
+
+Vector2 to_metric(Vector2 point) {
+	Vector2 metric = {
+		point.x / PIXELS_PER_METER, 
+		(size_px - point.y) / PIXELS_PER_METER
+	};
+	return metric;
 }
 
 double get_torque(Vector2 point, Vector2 force) {
-	Vector2 center_metric = {center_of_mass.x / 7, (size_px - center_of_mass.y) / 7};
-	Vector2 r = V_subtract(point, center_metric);
+	Vector2 r = V_subtract(to_metric(point), to_metric(center_of_mass));
 	return V_cross_product(force, r);
+}
+
+Vector2 get_impact_force(Lander *lander, Vector2 point, double dt) {
+	Vector2 center = {center_of_mass.x / PIXELS_PER_METER, -center_of_mass.y / PIXELS_PER_METER};
+	point.y *= -1;
+	point = V_divide_const(point, PIXELS_PER_METER);
+	
+	point = V_subtract(point, center);
+	Vector2 velocity = V_add(lander->velocity, V_multiply_const(point, fabs(lander->angular_velocity)));
+
+	point = V_rotate(point, -lander->rotation);
+	point = V_add(V_add(point, center), lander->position);
+
+	Vector2 force = {0, 0};
+	if(point.y < get_terrain_height(point.x)) {
+		force.y = lander_total_mass(lander) * (-velocity.y / dt);
+		force.x = friction_coefficient * (lander_total_mass(lander) * (g - (velocity.y / dt)));
+		if(lander->velocity.x > 0)
+			force.x *= -1;
+	}
+	return force;
 }

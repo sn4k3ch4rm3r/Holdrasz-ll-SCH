@@ -55,3 +55,13 @@ SDL_Point V_to_point(Vector2 v) {
 	SDL_Point p = {v.x, v.y};
 	return p;
 }
+
+Vector2 V_rotate(Vector2 v, double deg) {
+	Vector2 rotated;
+	double rotation_rad = deg * M_PI / 180;
+	
+	rotated.x = v.x * cos(rotation_rad) - v.y * sin(rotation_rad);
+	rotated.y = v.x * sin(rotation_rad) + v.y * cos(rotation_rad);
+	
+	return rotated;
+}

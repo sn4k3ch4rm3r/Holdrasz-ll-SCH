@@ -32,4 +32,5 @@ void update_lander(Lander *lander, double dt);
 double get_lander_inertia(Lander *lander);
 double lander_total_mass(Lander *lander);
 double get_torque(Vector2 point, Vector2 force);
+Vector2 get_impact_force(Lander *lander, Vector2 point, double dt);
 #endif

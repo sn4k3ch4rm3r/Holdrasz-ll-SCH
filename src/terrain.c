@@ -5,6 +5,8 @@
 #include "camera.h"
 #include "vector.h"
 
+const int terrain_max_height = 50;
+
 double pseudo_random(int x) {
 	int seed = 0;
 	int a = (seed + x) * 15485863;
@@ -29,8 +31,9 @@ double noise(int x, int scale) {
 }
 
 double get_terrain_height(int x) {
-	return noise(x, 128) * 0.6 +
-		   noise(x, 64) * 0.4;
+	double combined_noise = noise(x, 128) * 0.6 +
+		   					noise(x, 64) * 0.4;
+	return combined_noise * terrain_max_height;
 }
 
 void render_terrain(Camera *camera) {
@@ -40,7 +43,7 @@ void render_terrain(Camera *camera) {
 			x, 0
 		};
 		point = get_world_coordinates(camera, point);
-		point.y = floor(get_terrain_height(floor(point.x)) * 50 * PIXELS_PER_METER) / PIXELS_PER_METER;
+		point.y = floor(get_terrain_height(floor(point.x)) * PIXELS_PER_METER) / PIXELS_PER_METER;
 		Vector2 render = get_screen_coordinates(camera, point);
 		lineRGBA(camera->renderer, x, render.y, x, camera->height, 0xff, 0xff, 0xff, 0xff);
 	}

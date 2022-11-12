@@ -5,6 +5,8 @@ const double PIXELS_PER_METER = 7;
 const int camera_speed = 5;
 
 double lerp(double a, double b, double t) {
+	if(t < 0) return a;
+	else if(t > 1) return b;
 	return a * (1-t) + b * t;
 }
 
@@ -26,14 +28,9 @@ void update_camera(Camera *camera, Vector2 lander_pos, double dt) {
 	}
 
 	camera->position = lerp2(camera->position, target_pos, camera_speed * dt);
-	
-	double target_zoom = 0.5;
-	if(lander_pos.y < 50) {
-		target_zoom = 2;
-	}
-	else if(lander_pos.y < 100) {
-		target_zoom = 1;
-	}
+
+	double target_zoom = lerp(2, 0.5, (lander_pos.y - 20) / 150);
+
 	camera->zoom = lerp(camera->zoom, target_zoom, camera_speed * dt);
 }
 

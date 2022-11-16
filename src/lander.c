@@ -1,7 +1,9 @@
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL2_gfxPrimitives.h>
 #include <stdbool.h>
 #include <math.h>
+#include <stdio.h>
 
 #include "lander.h"
 #include "vector.h"
@@ -21,6 +23,9 @@ const double g = 1.62;
 const double friction_coefficient = 0.5;
 const Vector2 center_of_mass = {32.5, 20};
 
+SDL_Texture *lander_texture;
+SDL_Texture *dashboard_texture;
+
 Lander init_lander(SDL_Renderer *renderer) {
 	Lander lander = {
 		{0, 200},
@@ -32,11 +37,15 @@ Lander init_lander(SDL_Renderer *renderer) {
 		{0},
 		IMG_LoadTexture(renderer, "assets/lunar_module.png")
 	};
+	lander_texture = IMG_LoadTexture(renderer, "assets/lunar_module.png");
+	dashboard_texture = IMG_LoadTexture(renderer, "assets/dashboard.png");
 	return lander;
 }
 
 void destroy_lander(Lander *lander) {
 	SDL_DestroyTexture(lander->texture);
+	SDL_DestroyTexture(lander_texture);
+	SDL_DestroyTexture(dashboard_texture);
 }
 
 void render_lander(Camera *camera, Lander *lander) {
@@ -53,6 +62,67 @@ void render_lander(Camera *camera, Lander *lander) {
 			SDL_RenderCopyEx(camera->renderer, lander->texture, &src, &dst, lander->rotation, &center, SDL_FLIP_NONE);
 		}
 	}
+}
+
+void display_dashboard(Camera *camera, Lander *lander) {
+	//Render the backgound
+	SDL_Rect base_rect = {0, 0, 211, 128};
+	SDL_Rect dashboard_rect = {0, 0, 422, 256};
+	SDL_RenderCopy(camera->renderer, dashboard_texture, &base_rect, &dashboard_rect);
+	
+	//Display current altitude
+	char alt_str[10];
+	snprintf(alt_str, 10, "%.1lf m", lander->position.y);
+	stringRGBA(camera->renderer, 20, 204, alt_str, 0xff, 0xff, 0xff, 0xff);
+
+	//Display fuel remaining
+	if(lander->propellant > 0){
+		int fuel_height = 147 - ((147 - 14) * (lander->propellant / propellant_mass));
+		thickLineRGBA(camera->renderer, 38, 147, 38, fuel_height, 44, 0x75, 0xa4, 0x43, 0xff);
+	}
+
+	int handle_len = 50;
+	Vector2 handle_center = {
+		153,
+		67
+	};
+	Vector2 handle_pos;
+	//Display Vy
+	handle_pos.x = sin(lander->velocity.y / 20 * M_PI_2) * handle_len;
+	handle_pos.y = -cos(lander->velocity.y / 20 * M_PI_2) * handle_len;
+	handle_pos = V_add(handle_center, handle_pos);
+	thickLineRGBA(camera->renderer, handle_center.x, handle_center.y, handle_pos.x, handle_pos.y, 2, 0xa5, 0x30, 0x30, 0xff);
+	
+	//Display Vx
+	handle_center.y = 185;
+	handle_pos.x = sin(lander->velocity.x / 100 * M_PI_2) * handle_len;
+	handle_pos.y = -cos(lander->velocity.x / 100 * M_PI_2) * handle_len;
+	handle_pos = V_add(handle_center, handle_pos);
+	thickLineRGBA(camera->renderer, handle_center.x, handle_center.y, handle_pos.x, handle_pos.y, 2, 0xa5, 0x30, 0x30, 0xff);
+
+	//Display indicator lights
+	SDL_Rect indicator_light = {211, 80, 14, 14};
+	SDL_Rect light_dst = {0, 192, 28, 28};
+	if(fabs(lander->velocity.x) < 2) {
+		light_dst.x = 234;
+		SDL_RenderCopy(camera->renderer, dashboard_texture, &indicator_light, &light_dst);
+	}
+	if(fabs(lander->velocity.y) < 2) {
+		light_dst.x = 282;
+		SDL_RenderCopy(camera->renderer, dashboard_texture, &indicator_light, &light_dst);
+	}
+	if(abs(lander->rotation) % 360 < 10) {
+		light_dst.x = 330;
+		SDL_RenderCopy(camera->renderer, dashboard_texture, &indicator_light, &light_dst);
+	}
+	///@TODO: Display contact indicator
+
+	//Display artificial horizon
+	SDL_Rect horizon_rect = {211, 0, 74, 74};
+	SDL_Rect horizon_dst = {248, 16, 144, 144};
+	SDL_RenderCopyEx(camera->renderer, dashboard_texture, &horizon_rect, &horizon_dst, lander->rotation, NULL, SDL_FLIP_NONE);
+	thickLineRGBA(camera->renderer, 230, 88, 270, 88, 4, 0xde, 0x9e, 0x41, 0xff);
+	thickLineRGBA(camera->renderer, 368, 88, 408, 88, 4, 0xde, 0x9e, 0x41, 0xff);
 }
 
 void update_lander(Lander *lander, double dt) {

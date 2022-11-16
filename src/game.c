@@ -57,6 +57,7 @@ void game_loop(GameState *state) {
 
 		render_lander(&state->camera, &state->lander);
 		render_terrain(&state->camera);
+		display_dashboard(&state->camera, &state->lander);
 
 		SDL_RenderPresent(state->camera.renderer);
 

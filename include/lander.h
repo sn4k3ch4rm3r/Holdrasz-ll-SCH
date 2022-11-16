@@ -39,6 +39,8 @@ void destroy_lander(Lander *lander);
 /// @param lander Lander to render 
 void render_lander(Camera *camera, Lander *lander);
 
+void display_dashboard(Camera *camera, Lander *lander);
+
 /// @brief Apply forces and update position and rotation of the lander.
 /// @param lander The lander to update
 /// @param dt Time since last frame

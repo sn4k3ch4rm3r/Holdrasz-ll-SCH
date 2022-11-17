@@ -33,11 +33,11 @@ debug: setupdirs Holdraszallasch
 setupdirs:
 	$(MKDIR)
 
-%.o: $(SRCDIR)/%.c
-	$(CC) $(CFLAGS) $(INCLUDE) -c -o $(OBJDIR)/$@ $<
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
-Holdraszallasch: $(OBJECTS)
-	$(CC) $(CFLAGS) -o $(TARGET)/$@ $(addprefix $(OBJDIR)/, $^) $(LIB)
+Holdraszallasch: $(addprefix $(OBJDIR)/, $(OBJECTS))
+	$(CC) $(CFLAGS) -o $(TARGET)/$@ $^ $(LIB)
 	$(COPYASSETS)
 
 clean:

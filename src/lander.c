@@ -111,7 +111,7 @@ void display_dashboard(Camera *camera, Lander *lander) {
 		light_dst.x = 282;
 		SDL_RenderCopy(camera->renderer, dashboard_texture, &indicator_light, &light_dst);
 	}
-	if(abs(lander->rotation) % 360 < 10) {
+	if(abs(lander->rotation) % 360 < 10 || abs(lander->rotation) % 360 > 350) {
 		light_dst.x = 330;
 		SDL_RenderCopy(camera->renderer, dashboard_texture, &indicator_light, &light_dst);
 	}

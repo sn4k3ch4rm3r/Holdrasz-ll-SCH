@@ -13,7 +13,7 @@ double pseudo_random(int x) {
 	return 2 * (((a*a*a) % 2038074743) / 2038074743.0 - 0.5);
 }
 
-double noise(int x, int scale) {
+double noise(double x, int scale) {
 	double p = x / (double)scale;
 	
 	double d1 = p - floor(p);
@@ -30,7 +30,7 @@ double noise(int x, int scale) {
 	return val * 0.5 + 0.5;
 }
 
-double get_terrain_height(int x) {
+double get_terrain_height(double x) {
 	double combined_noise = noise(x, 128) * 0.6 +
 		   					noise(x, 64) * 0.4;
 	return combined_noise * terrain_max_height;

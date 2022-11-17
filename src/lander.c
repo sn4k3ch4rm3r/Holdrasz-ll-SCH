@@ -20,7 +20,7 @@ const int rcs_thrust = 20000;
 const int main_engine_fuel_rate = 136;
 const int rcs_fuel_rate = 13;
 const double g = 1.62;
-const double friction_coefficient = 0.5;
+const double friction_coefficient = 0.2;
 const Vector2 center_of_mass = {32.5, 20};
 
 SDL_Texture *lander_texture;
@@ -235,12 +235,27 @@ Vector2 get_impact_force(Lander *lander, Vector2 point, double dt) {
 	point = V_rotate(point, -lander->rotation);
 	point = V_add(V_add(point, center), lander->position);
 
+	const double ds = 0.5;
+
+	Vector2 p1 = {
+		floor(point.x), get_terrain_height(floor(point.x))
+	};
+	Vector2 p2 = {
+		floor(point.x)+ds, get_terrain_height(floor(point.x)+ds)
+	};
+
+	double slope = p2.y - p1.y;
+	double angle = (atan(slope/ds) / M_PI) * 180;
+
 	Vector2 force = {0, 0};
 	if(point.y < get_terrain_height(point.x)) {
+		velocity = V_rotate(velocity, -angle);
 		force.y = lander_total_mass(lander) * (-velocity.y / dt);
-		force.x = friction_coefficient * (lander_total_mass(lander) * (g - (velocity.y / dt)));
-		if(lander->velocity.x > 0)
+		force.x = friction_coefficient * (lander_total_mass(lander) * (g - velocity.y / dt));
+		if(lander->velocity.x > 0) {
 			force.x *= -1;
+		}
+		force = V_rotate(force, angle);
 	}
 	return force;
 }

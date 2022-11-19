@@ -9,6 +9,7 @@
 #include "vector.h"
 #include "camera.h"
 #include "terrain.h"
+#include "events.h"
 
 const int dry_mass = 7000;
 const int propellant_mass = 8200;
@@ -175,19 +176,27 @@ void update_lander(Lander *lander, double dt) {
 	}
 	force = V_rotate(force, -lander->rotation);
 
-	Vector2 left_leg = {2, 52};
-	Vector2 right_leg = {62, 52};
+	ImpactPoint impact_points[] = {
+		{{2, 52}, true},
+		{{62, 52}, true},
+		{{18, 1}, false},
+		{{46, 5}, false}
+	};
+
 	Vector2 impact_force;
+	for(int i = 0; i < 4; i++) {
+		impact_force = get_impact_force(lander, impact_points[i].point, dt);
+		if(V_len(impact_force) * dt > 25000 || (V_len(impact_force) != 0 && !impact_points[i].can_collide)) {
+			SDL_Event event;
+			event.type = SDL_USEREVENT;
+			event.user.code = DEATH_EVENT_CODE;
+			SDL_PushEvent(&event);
+		}
 
-	impact_force = get_impact_force(lander, left_leg, dt);
-	force = V_add(force, impact_force);
-	impact_force = V_rotate(impact_force, lander->rotation);
-	torque += get_torque(left_leg, impact_force) * dt;
-
-	impact_force = get_impact_force(lander, right_leg, dt);
-	force = V_add(force, impact_force);
-	impact_force = V_rotate(impact_force, lander->rotation);
-	torque += get_torque(right_leg, impact_force) * dt;
+		force = V_add(force, impact_force);
+		impact_force = V_rotate(impact_force, lander->rotation);
+		torque += get_torque(impact_points[i].point, impact_force) * dt;
+	}
 
 	Vector2 accelartion = V_divide_const(force, lander_total_mass(lander));
 	accelartion.y -= g;

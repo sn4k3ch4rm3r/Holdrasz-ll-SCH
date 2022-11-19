@@ -25,6 +25,11 @@ typedef struct Lander {
 	SDL_Texture *texture;
 } Lander;
 
+typedef struct ImpactPoint {
+	Vector2 point;
+	bool can_collide;
+} ImpactPoint;
+
 /// @brief Initializes the lander struct's data.
 /// @param renderer Needed for loading sprites
 /// @return Lander struct with default values set up

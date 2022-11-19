@@ -11,6 +11,7 @@
 #include "vector.h"
 #include "lander.h"
 #include "camera.h"
+#include "events.h"
 
 GameState init_game(SDL_Renderer *renderer) {
 	Lander lander = init_lander(renderer);

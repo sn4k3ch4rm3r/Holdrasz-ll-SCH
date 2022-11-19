@@ -2,9 +2,12 @@
 #include <stdbool.h>
 #include <SDL.h>
 
+#include "main.h"
 #include "game.h"
+#include "lander.h"
 
 int main(int argc, char* argv[]) {
+	//Set up SDL
 	if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
 		SDL_Log("Failed to initialize SDL: %s", SDL_GetError());
 		exit(1);
@@ -23,10 +26,38 @@ int main(int argc, char* argv[]) {
 	}
 	SDL_RenderClear(renderer);
 
+	//Set up the state
+	Screen current_screen = GAME;
 	GameState game_state = init_game(renderer);
-	game_loop(&game_state);
+
+	bool is_running = true;
+	SDL_Event event;
+
+	//Main loop
+	while (is_running) {
+		while(SDL_PollEvent(&event)) {
+			switch (event.type)
+			{
+			case SDL_QUIT:
+				is_running = false;
+				destroy_lander(&game_state.lander);
+				break;
+			
+			default:
+				game_events(event, &game_state);
+				break;
+			}
+		}
+
+		switch(current_screen) {
+			case GAME:
+				update_game(&game_state);
+				break;
+		}
+	}
 
 	SDL_Quit();
 
 	return 0;
 }
+

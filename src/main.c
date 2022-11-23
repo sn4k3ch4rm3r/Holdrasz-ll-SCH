@@ -1,10 +1,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <SDL.h>
+#include <SDL_ttf.h>
 
-#include "main.h"
 #include "game.h"
-#include "lander.h"
+#include "menu.h"
 
 int main(int argc, char* argv[]) {
 	//Set up SDL
@@ -24,38 +24,62 @@ int main(int argc, char* argv[]) {
 	if(renderer == NULL) {
 		SDL_Log("Error while creating renderer: %s", SDL_GetError());
 	}
+	
+	TTF_Init();
+	TTF_Font *font = TTF_OpenFont("assets/PressStart2P.ttf", 24);
+	if(font == NULL) {
+		SDL_Log("Error while opening font: %s", TTF_GetError());
+		exit(1);
+	}
+	
 	SDL_RenderClear(renderer);
 
+
 	//Set up the state
-	Screen current_screen = GAME;
+	Screen current_screen = MENU;
 	GameState game_state = init_game(renderer);
+
+	init_menu();
 
 	bool is_running = true;
 	SDL_Event event;
 
 	//Main loop
 	while (is_running) {
+	
 		while(SDL_PollEvent(&event)) {
-			switch (event.type)
-			{
-			case SDL_QUIT:
-				is_running = false;
-				destroy_lander(&game_state.lander);
-				break;
-			
-			default:
-				game_events(event, &game_state);
-				break;
+			switch (event.type) {
+				case SDL_QUIT:
+					is_running = false;
+					destroy_game(&game_state);
+					break;
+				
+				default:
+					switch (current_screen) {
+						case GAME:
+							game_events(event, &game_state);
+							break;
+						case MENU:
+							current_screen = menu_events(event);
+							break;
+						default:
+							break;
+					}
+					break;
 			}
 		}
 
 		switch(current_screen) {
+			case MENU:
+				render_menu(renderer, font);
+				break;
 			case GAME:
 				update_game(&game_state);
 				break;
 		}
 	}
 
+	TTF_CloseFont(font);
 	SDL_Quit();
 
 	return 0;

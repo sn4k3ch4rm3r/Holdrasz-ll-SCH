@@ -93,3 +93,7 @@ void game_events(SDL_Event event, GameState *state) {
 			break;
 	}
 }
+
+void destroy_game(GameState *state) {
+	destroy_lander(&state->lander);
+}

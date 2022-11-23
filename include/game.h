@@ -20,5 +20,5 @@ GameState init_game(SDL_Renderer *renderer);
 
 void update_game(GameState *state);
 void game_events(SDL_Event event, GameState *state);
-
+void destroy_game(GameState *state);
 #endif

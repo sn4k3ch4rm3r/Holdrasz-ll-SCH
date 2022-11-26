@@ -3,11 +3,11 @@
 
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <stdbool.h>
 
 typedef struct Button {
 	SDL_Rect rect;
-	SDL_Color bg;
-	SDL_Color fg;
+	bool hover;	
 	char *text;
 } Button;
 

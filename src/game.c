@@ -120,15 +120,9 @@ void render_game_over(Camera *camera) {
 		.h = 70
 	};
 
-	const SDL_Color bg_color = {129, 151, 150, 255};
-	const SDL_Color hover_color = {168, 202, 88, 255};
-	const SDL_Color fg_color = {255, 255, 255, 255};
-
 	for (int i = 0; i < button_count; i++)
 	{
 		buttons[i].rect = rect;
-		buttons[i].bg = bg_color;
-		buttons[i].fg = fg_color;
 
 		buttons[i].rect.x = container.x + (container.w / 2) - (buttons[i].rect.w / 2);
 		buttons[i].rect.y = container.y + text_s->h + (container.h / 2) - (((buttons[i].rect.h * button_count) + (5 * (button_count - 1))) / 2) + ((buttons[i].rect.h + 5) * i);

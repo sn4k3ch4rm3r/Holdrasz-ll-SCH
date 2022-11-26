@@ -14,9 +14,6 @@ Button buttons[] = {
 };
 const int button_count = 2;
 const margin = 20;
-const SDL_Color bg_color = {129, 151, 150, 255};
-const SDL_Color hover_color = {168, 202, 88, 255};
-const SDL_Color fg_color = {255, 255, 255, 255};
 
 TTF_Font *font;
 
@@ -34,8 +31,6 @@ void init_menu() {
 	for (int i = 0; i < button_count; i++)
 	{
 		buttons[i].rect = rect;
-		buttons[i].bg = bg_color;
-		buttons[i].fg = fg_color;
 	}
 	
 }
@@ -71,12 +66,7 @@ Screen menu_events(SDL_Event event) {
 
 			for (int i = 0; i < button_count; i++)
 			{
-				if(SDL_PointInRect(&point, &buttons[i].rect)){
-					buttons[i].bg = hover_color;
-				}
-				else {
-					buttons[i].bg = bg_color;
-				}
+				buttons[i].hover = SDL_PointInRect(&point, &buttons[i].rect);
 			}
 			break;
 		}

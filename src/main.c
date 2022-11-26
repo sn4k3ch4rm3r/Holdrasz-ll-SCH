@@ -26,18 +26,13 @@ int main(int argc, char* argv[]) {
 	}
 	
 	TTF_Init();
-	TTF_Font *font = TTF_OpenFont("assets/PressStart2P.ttf", 24);
-	if(font == NULL) {
-		SDL_Log("Error while opening font: %s", TTF_GetError());
-		exit(1);
-	}
 	
 	SDL_RenderClear(renderer);
 
 
 	//Set up the state
 	Screen current_screen = MENU;
-	GameState game_state = init_game(renderer);
+	GameState game_state;
 
 	init_menu();
 
@@ -51,16 +46,17 @@ int main(int argc, char* argv[]) {
 			switch (event.type) {
 				case SDL_QUIT:
 					is_running = false;
-					destroy_game(&game_state);
 					break;
 				
 				default:
 					switch (current_screen) {
 						case GAME:
-							game_events(event, &game_state);
+							current_screen = game_events(event, &game_state);
 							break;
 						case MENU:
 							current_screen = menu_events(event);
+							if(current_screen == GAME)
+								game_state = init_game(renderer);
 							break;
 						default:
 							break;
@@ -71,7 +67,7 @@ int main(int argc, char* argv[]) {
 
 		switch(current_screen) {
 			case MENU:
-				render_menu(renderer, font);
+				render_menu(renderer);
 				break;
 			case GAME:
 				update_game(&game_state);
@@ -79,7 +75,9 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	TTF_CloseFont(font);
+	destroy_menu();
+	destroy_game(&game_state);
+
 	SDL_Quit();
 
 	return 0;

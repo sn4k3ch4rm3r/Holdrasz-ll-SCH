@@ -11,6 +11,7 @@ typedef enum Screen {
 } Screen;
 
 void init_menu();
-void render_menu(SDL_Renderer *renderer, TTF_Font *font);
+void destroy_menu();
+void render_menu(SDL_Renderer *renderer);
 Screen menu_events(SDL_Event event);
 #endif

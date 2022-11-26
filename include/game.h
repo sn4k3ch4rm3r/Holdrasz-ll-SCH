@@ -5,12 +5,14 @@
 
 #include "lander.h"
 #include "camera.h"
+#include "menu.h"
 
 typedef struct GameState {
 	Lander lander;
 	Camera camera;
 	double delta_time;
 	bool game_over;
+	bool successfull;
 } GameState;
 
 /// @brief Sets up the default parameters for the lander, the camera and the world.
@@ -19,6 +21,7 @@ typedef struct GameState {
 GameState init_game(SDL_Renderer *renderer);
 
 void update_game(GameState *state);
-void game_events(SDL_Event event, GameState *state);
+Screen game_events(SDL_Event event, GameState *state);
 void destroy_game(GameState *state);
+void render_game_over(Camera *camera);
 #endif

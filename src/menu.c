@@ -18,7 +18,15 @@ const SDL_Color bg_color = {129, 151, 150, 255};
 const SDL_Color hover_color = {168, 202, 88, 255};
 const SDL_Color fg_color = {255, 255, 255, 255};
 
+TTF_Font *font;
+
 void init_menu() {
+	font = TTF_OpenFont("assets/PressStart2P.ttf", 24);
+	if(font == NULL) {
+		SDL_Log("Error while opening font: %s", TTF_GetError());
+		exit(1);
+	}
+
 	SDL_Rect rect = {
 		.w = 350,
 		.h = 80
@@ -32,7 +40,11 @@ void init_menu() {
 	
 }
 
-void render_menu(SDL_Renderer *renderer, TTF_Font *font) {
+void destroy_menu() {
+	TTF_CloseFont(font);
+}
+
+void render_menu(SDL_Renderer *renderer) {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xff);
 	SDL_RenderClear(renderer);
 

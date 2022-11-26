@@ -13,7 +13,7 @@ Button buttons[] = {
 	}
 };
 const int button_count = 2;
-const margin = 20;
+const int margin = 20;
 
 TTF_Font *font;
 

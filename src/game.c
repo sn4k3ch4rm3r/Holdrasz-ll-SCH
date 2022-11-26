@@ -18,6 +18,13 @@
 TTF_Font *font_large;
 TTF_Font *font_small;
 
+static Button buttons[] = {
+	{.text = "Retry"},
+	{.text = "New Game"},
+	{.text = "Exit"},
+};
+static int button_count = 3;
+
 GameState init_game(SDL_Renderer *renderer) {
 	Lander lander = init_lander(renderer);
 	Camera camera = {
@@ -108,21 +115,10 @@ void render_game_over(Camera *camera) {
 
 	SDL_RenderCopy(renderer, text_t, NULL, &dst);
 
-	Button buttons[] = {
-		{.text = "Retry"},
-		{.text = "New Game"},
-		{.text = "Exit"},
-	};
-	int button_count = 3;
-
-	SDL_Rect rect = {
-		.w = text_s->w, 
-		.h = 70
-	};
-
 	for (int i = 0; i < button_count; i++)
 	{
-		buttons[i].rect = rect;
+		buttons[i].rect.w = text_s->w;
+		buttons[i].rect.h = 70;
 
 		buttons[i].rect.x = container.x + (container.w / 2) - (buttons[i].rect.w / 2);
 		buttons[i].rect.y = container.y + text_s->h + (container.h / 2) - (((buttons[i].rect.h * button_count) + (5 * (button_count - 1))) / 2) + ((buttons[i].rect.h + 5) * i);
@@ -157,6 +153,40 @@ Screen game_events(SDL_Event event, GameState *state) {
 			}
 			break;
 		}
+		case SDL_MOUSEMOTION: {
+			SDL_Point point = {
+				event.motion.x,
+				event.motion.y
+			};
+
+			for (int i = 0; i < button_count; i++)
+			{
+				buttons[i].hover = SDL_PointInRect(&point, &buttons[i].rect);
+			}
+			break;
+		}
+		case SDL_MOUSEBUTTONDOWN: 
+			if(event.button.button == SDL_BUTTON_LEFT) {
+				SDL_Point point = {
+					event.button.x,
+					event.button.y,
+				};
+
+				if(SDL_PointInRect(&point, &buttons[0].rect)) {
+					SDL_Renderer *renderer = state->camera.renderer;
+					destroy_game(state);
+					*state = init_game(renderer);
+				}
+				else if(SDL_PointInRect(&point, &buttons[1].rect)) {
+					SDL_Renderer *renderer = state->camera.renderer;
+					destroy_game(state);
+					*state = init_game(renderer);
+				}
+				else if(SDL_PointInRect(&point, &buttons[2].rect)){
+					return MENU;
+				}
+			}
+			break;
 		case SDL_USEREVENT:
 			switch (event.user.code)
 			{
@@ -170,7 +200,10 @@ Screen game_events(SDL_Event event, GameState *state) {
 }
 
 void destroy_game(GameState *state) {
-	destroy_lander(&state->lander);
-	TTF_CloseFont(font_large);
-	TTF_CloseFont(font_small);
+	if(!state->destroyed) {
+		destroy_lander(&state->lander);
+		TTF_CloseFont(font_large);
+		TTF_CloseFont(font_small);
+		state->destroyed = true;
+	}
 }

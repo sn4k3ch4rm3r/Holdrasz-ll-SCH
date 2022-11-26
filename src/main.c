@@ -52,6 +52,9 @@ int main(int argc, char* argv[]) {
 					switch (current_screen) {
 						case GAME:
 							current_screen = game_events(event, &game_state);
+							if(current_screen == MENU) {
+								destroy_game(&game_state);
+							}
 							break;
 						case MENU:
 							current_screen = menu_events(event);

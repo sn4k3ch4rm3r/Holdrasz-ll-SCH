@@ -13,6 +13,7 @@ typedef struct GameState {
 	double delta_time;
 	bool game_over;
 	bool successfull;
+	bool destroyed;
 } GameState;
 
 /// @brief Sets up the default parameters for the lander, the camera and the world.

@@ -1,15 +1,23 @@
 #include <SDL.h>
 #include <SDL2_gfxPrimitives.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include "camera.h"
 #include "vector.h"
 
 const int terrain_max_height = 50;
+int TERRAIN_SEED;
+
+void init_terrain(int *set_seed) {
+	if(set_seed == NULL)
+		TERRAIN_SEED = rand();
+	else
+		TERRAIN_SEED = *set_seed;
+}
 
 double pseudo_random(int x) {
-	int seed = 0;
-	int a = (seed + x) * 15485863;
+	int a = (TERRAIN_SEED + x) * 15485863;
 	return 2 * (((a*a*a) % 2038074743) / 2038074743.0 - 0.5);
 }
 

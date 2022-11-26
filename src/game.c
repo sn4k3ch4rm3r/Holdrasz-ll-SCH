@@ -25,7 +25,7 @@ static Button buttons[] = {
 };
 static int button_count = 3;
 
-GameState init_game(SDL_Renderer *renderer) {
+GameState init_game(SDL_Renderer *renderer, int *terrain_seed) {
 	Lander lander = init_lander(renderer);
 	Camera camera = {
 		.position = {0, 0},
@@ -53,6 +53,8 @@ GameState init_game(SDL_Renderer *renderer) {
 		SDL_Log("Error while opening font: %s", TTF_GetError());
 		exit(1);
 	}
+
+	init_terrain(terrain_seed);
 
 	return state;
 }
@@ -175,12 +177,12 @@ Screen game_events(SDL_Event event, GameState *state) {
 				if(SDL_PointInRect(&point, &buttons[0].rect)) {
 					SDL_Renderer *renderer = state->camera.renderer;
 					destroy_game(state);
-					*state = init_game(renderer);
+					*state = init_game(renderer, &TERRAIN_SEED);
 				}
 				else if(SDL_PointInRect(&point, &buttons[1].rect)) {
 					SDL_Renderer *renderer = state->camera.renderer;
 					destroy_game(state);
-					*state = init_game(renderer);
+					*state = init_game(renderer, NULL);
 				}
 				else if(SDL_PointInRect(&point, &buttons[2].rect)){
 					return MENU;

@@ -47,7 +47,7 @@ void render_particles(Camera *camera, List *list) {
 			lerp(element->particle.start_color.b, element->particle.end_color.b, element->particle.lived / element->particle.life_time),
 			lerp(element->particle.start_color.a, element->particle.end_color.a, element->particle.lived / element->particle.life_time)
 		};
-		filledCircleRGBA(camera->renderer, screen_coords.x, screen_coords.y, 6 * (1 - element->particle.lived / element->particle.life_time) * camera->zoom, color.r, color.g, color.b, color.a);
+		filledCircleRGBA(camera->renderer, screen_coords.x, screen_coords.y, element->particle.size * (1 - element->particle.lived / element->particle.life_time) * camera->zoom, color.r, color.g, color.b, color.a);
 	}
 }
 

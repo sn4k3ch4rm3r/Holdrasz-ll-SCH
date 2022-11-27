@@ -11,6 +11,7 @@ typedef struct Particle {
 	Vector2 position;
 	double life_time;
 	double lived;
+	double size;
 } Particle;
 
 typedef struct ListElement ListElement;

@@ -57,17 +57,9 @@ void destroy_lander(Lander *lander) {
 void render_lander(Camera *camera, Lander *lander) {
 	Vector2 screen_coords = get_screen_coordinates(camera, lander->position);
 	SDL_Point center = V_to_point(V_multiply_const(center_of_mass, camera->zoom));
-	SDL_Rect src = {0, 0, size_px, size_px};
 	SDL_Rect dst = {screen_coords.x, screen_coords.y, size_px * camera->zoom, size_px * camera->zoom};
+	SDL_RenderCopyEx(camera->renderer, lander_texture, NULL, &dst, lander->rotation, &center, SDL_FLIP_NONE);
 
-	// -1 is the lander itself
-	int render_order[] = {MAIN_ENGINE, -1, LEFT_ENGINE, RIGHT_ENGINE, ROTATE_CW, ROTATE_CCW};
-	for (int i = 0; i < 6; i++) {
-		if(render_order[i] == -1) {// || (lander->engines[render_order[i]] && lander->propellant > 0)) {
-			src.x = (render_order[i] + 1) * size_px;
-			SDL_RenderCopyEx(camera->renderer, lander_texture, &src, &dst, lander->rotation, &center, SDL_FLIP_NONE);
-		}
-	}
 	render_particles(camera, &lander->particle_system);
 }
 
@@ -132,14 +124,15 @@ void display_dashboard(Camera *camera, Lander *lander) {
 	thickLineRGBA(camera->renderer, 368, 88, 408, 88, 4, 0xde, 0x9e, 0x41, 0xff);
 }
 
-void add_engine_particles(Lander *lander, int count, SDL_Rect area, double life, Vector2 velocity, double angle, SDL_Color start_color, SDL_Color end_color) {
+void add_engine_particles(Lander *lander, int count, double size, SDL_Rect area, double life, Vector2 velocity, double angle, SDL_Color start_color, SDL_Color end_color) {
 	for(int i = 0; i < count; i++) {
 		Particle p = {
 			.start_color = start_color,
 			.end_color = end_color,
 			.life_time = life * ((double)rand() / (double)RAND_MAX),
 			.position = {area.x + rand() % (area.w + 1), area.y + rand() % (area.h + 1)},
-			.velocity = V_multiply_const(velocity, ((double)rand() / (double)RAND_MAX))
+			.velocity = V_multiply_const(velocity, ((double)rand() / (double)RAND_MAX)),
+			.size = size
 		};
 		p.velocity = V_add(lander->velocity, V_rotate(p.velocity, -lander->rotation + (rand() % (int)angle - angle / 2)));
 		Vector2 center = {center_of_mass.x / PIXELS_PER_METER, -center_of_mass.y / PIXELS_PER_METER};
@@ -168,7 +161,7 @@ void update_lander(Lander *lander, double dt) {
 			SDL_Color end_color = {0xe8, 0xc1, 0x70, 0x00};
 			SDL_Rect area = {26, 55, 11, 0};
 			Vector2 velocity = {0, -50};
-			add_engine_particles(lander, 100, area, 0.5, velocity, 120, start_color, end_color);
+			add_engine_particles(lander, 100, 6, area, 0.5, velocity, 120, start_color, end_color);
 		}
 		if(lander->engines[ROTATE_CW]) {
 			Vector2 left_rcs = {20, 23};
@@ -180,6 +173,18 @@ void update_lander(Lander *lander, double dt) {
 			torque += get_torque(left_rcs, left_force);
 			torque += get_torque(right_rcs, right_force);
 			lander->propellant -= rcs_fuel_rate * dt;
+			
+			//Particles
+			SDL_Color start_color = {0xff, 0xff, 0xff, 0xff};
+			SDL_Color end_color = {0xc7, 0xcf, 0xcc, 0x00};
+			SDL_Rect area = {19, 23, 2, 0};
+			Vector2 velocity = {0, -100};
+			add_engine_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
+
+			velocity.y = 100;
+			area.x = 43;
+			area.y = 14;
+			add_engine_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
 		}
 		if(lander->engines[ROTATE_CCW]) {
 			Vector2 left_rcs = {20, 14};
@@ -191,6 +196,18 @@ void update_lander(Lander *lander, double dt) {
 			torque += get_torque(left_rcs, left_force);
 			torque += get_torque(right_rcs, right_force);
 			lander->propellant -= rcs_fuel_rate * dt;
+			
+			//Particles
+			SDL_Color start_color = {0xff, 0xff, 0xff, 0xff};
+			SDL_Color end_color = {0xc7, 0xcf, 0xcc, 0x00};
+			SDL_Rect area = {19, 14, 2, 0};
+			Vector2 velocity = {0, 100};
+			add_engine_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
+
+			velocity.y = -100;
+			area.x = 43;
+			area.y = 23;
+			add_engine_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
 		}
 		if(lander->engines[LEFT_ENGINE]) {
 			Vector2 rcs = {16, 19};
@@ -204,8 +221,8 @@ void update_lander(Lander *lander, double dt) {
 			SDL_Color start_color = {0xff, 0xff, 0xff, 0xff};
 			SDL_Color end_color = {0xc7, 0xcf, 0xcc, 0x00};
 			SDL_Rect area = {15, 18, 0, 2};
-			Vector2 velocity = {-25, 0};
-			add_engine_particles(lander, 20, area, 0.5, velocity, 120, start_color, end_color);
+			Vector2 velocity = {-100, 0};
+			add_engine_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
 		}
 		if(lander->engines[RIGHT_ENGINE]) {
 			Vector2 rcs = {47, 19};
@@ -214,6 +231,13 @@ void update_lander(Lander *lander, double dt) {
 			torque += get_torque(rcs, f);
 			force = V_add(force, f);
 			lander->propellant -= rcs_fuel_rate * dt;
+
+			//Particles
+			SDL_Color start_color = {0xff, 0xff, 0xff, 0xff};
+			SDL_Color end_color = {0xc7, 0xcf, 0xcc, 0x00};
+			SDL_Rect area = {48, 18, 0, 2};
+			Vector2 velocity = {100, 0};
+			add_engine_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
 		}
 	}
 	force = V_rotate(force, -lander->rotation);

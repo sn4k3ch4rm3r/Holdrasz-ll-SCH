@@ -15,6 +15,7 @@
 #include "menu.h"
 #include "button.h"
 #include "particle.h"
+#include "text_input.h"
 
 TTF_Font *font_large;
 TTF_Font *font_small;
@@ -89,6 +90,10 @@ void update_game(GameState *state) {
 	display_dashboard(&state->camera, &state->lander);
 
 	if(state->game_over && state->game_over_dealy <= 0) {
+		if(state->successfull && !state->saved) {
+			save_state(state);
+			state->saved = true;
+		}
 		render_game_over(&state->camera);
 	}
 	else if(state->game_over) {
@@ -98,6 +103,49 @@ void update_game(GameState *state) {
 	SDL_RenderPresent(state->camera.renderer);
 
 	state->delta_time = (SDL_GetPerformanceCounter() - time)/SDL_GetPerformanceFrequency();
+}
+
+SDL_Rect render_text_centered(SDL_Renderer *renderer, SDL_Rect *container, char *text, TTF_Font *font, SDL_Color text_color, double y_offset) {
+	SDL_Surface *text_s = TTF_RenderUTF8_Solid(font, text, text_color);
+	SDL_Texture *text_t = SDL_CreateTextureFromSurface(renderer, text_s);
+
+	SDL_Rect dst = {
+		container->x + (container->w / 2) - (text_s->w / 2),
+		container->y + y_offset,
+		text_s->w,
+		text_s->h
+	};
+
+	SDL_RenderCopy(renderer, text_t, NULL, &dst);
+	SDL_FreeSurface(text_s);
+	SDL_DestroyTexture(text_t);
+
+	return dst;
+}
+
+void save_state(GameState *state) {
+	SDL_Renderer *renderer = state->camera.renderer;
+	SDL_Rect container = {
+		(state->camera.width - 500) / 2,
+		(state->camera.height - 350) / 2,
+		500,
+		350
+	};
+	SDL_SetRenderDrawColor(renderer, 0x39, 0x4a, 0x50, 0xff);
+	SDL_RenderFillRect(renderer, &container);
+	
+	SDL_Color text_color = {255, 255, 255, 255};
+	
+	render_text_centered(renderer, &container, "Success", font_large, text_color, 40);
+	SDL_Rect input_rect = render_text_centered(renderer, &container, "Type in your name:", font_small, text_color, 120);
+	render_text_centered(renderer, &container, "[Enter] to confirm", font_small, text_color, 230);
+	render_text_centered(renderer, &container, "Score: 0", font_small, text_color, 280);
+
+	char result[20];
+	input_rect.y += 50;
+	input_rect.h = 50;
+	SDL_Color input_bg = {0x39, 0x4a, 0x50, 0xff};
+	input_text(result, 20, input_rect, input_bg, text_color, font_small, state->camera.renderer);
 }
 
 void render_game_over(Camera *camera) {
@@ -114,30 +162,17 @@ void render_game_over(Camera *camera) {
 
 	SDL_Color text_color = {255, 255, 255, 255};
 
-	SDL_Surface *text_s = TTF_RenderUTF8_Solid(font_large, "Game Over", text_color);
-	SDL_Texture *text_t = SDL_CreateTextureFromSurface(renderer, text_s);
-
-	SDL_Rect dst = {
-		container.x + (container.w / 2) - (text_s->w / 2),
-		container.y + 40,
-		text_s->w,
-		text_s->h
-	};
-
-	SDL_RenderCopy(renderer, text_t, NULL, &dst);
+	SDL_Rect text_size = render_text_centered(renderer, &container, "Game Over", font_large, text_color, 40);
 
 	for (int i = 0; i < button_count; i++)
 	{
-		buttons[i].rect.w = text_s->w;
+		buttons[i].rect.w = text_size.w;
 		buttons[i].rect.h = 70;
 
 		buttons[i].rect.x = container.x + (container.w / 2) - (buttons[i].rect.w / 2);
-		buttons[i].rect.y = container.y + text_s->h + (container.h / 2) - (((buttons[i].rect.h * button_count) + (5 * (button_count - 1))) / 2) + ((buttons[i].rect.h + 5) * i);
+		buttons[i].rect.y = container.y + text_size.h + (container.h / 2) - (((buttons[i].rect.h * button_count) + (5 * (button_count - 1))) / 2) + ((buttons[i].rect.h + 5) * i);
 		render_button(renderer, font_small, buttons + i);
 	}
-	
-	SDL_FreeSurface(text_s);
-	SDL_DestroyTexture(text_t);
 }
 
 Screen game_events(SDL_Event event, GameState *state) {

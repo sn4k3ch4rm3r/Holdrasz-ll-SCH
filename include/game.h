@@ -15,6 +15,7 @@ typedef struct GameState {
 	bool game_over;
 	bool successfull;
 	bool destroyed;
+	bool saved;
 } GameState;
 
 /// @brief Sets up the default parameters for the lander, the camera and the world.
@@ -26,4 +27,5 @@ void update_game(GameState *state);
 Screen game_events(SDL_Event event, GameState *state);
 void destroy_game(GameState *state);
 void render_game_over(Camera *camera);
+void save_state(GameState *state);
 #endif

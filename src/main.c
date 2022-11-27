@@ -5,6 +5,7 @@
 
 #include "game.h"
 #include "menu.h"
+#include "leaderboard.h"
 
 #include "debugmalloc.h"
 
@@ -60,10 +61,16 @@ int main(int argc, char* argv[]) {
 							break;
 						case MENU:
 							current_screen = menu_events(event);
-							if(current_screen == GAME)
+							if(current_screen == GAME) {
 								game_state = init_game(renderer, NULL);
+							}
+							else if(current_screen == LEADERBOARD) {
+								destroy_leaderboard();
+								init_leaderboard();
+							}
 							break;
-						default:
+						case LEADERBOARD:
+							render_leaderboard(renderer);
 							break;
 					}
 					break;
@@ -77,12 +84,16 @@ int main(int argc, char* argv[]) {
 			case GAME:
 				update_game(&game_state);
 				break;
+			case LEADERBOARD:
+				render_leaderboard(renderer);
+				break;
 		}
 	}
 
 	destroy_menu();
 	destroy_game(&game_state);
-
+	destroy_leaderboard();
+	
 	SDL_Quit();
 
 	return 0;

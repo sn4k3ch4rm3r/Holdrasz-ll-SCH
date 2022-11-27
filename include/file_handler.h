@@ -5,11 +5,12 @@
 
 typedef struct Score {
 	int score;
-	char nev[15];
+	char name[15];
 	double time;
 	double fuel;
 	double quality;
 } Score;
 
 void append_score(Score *score);
+int read_scores(Score **scores);
 #endif

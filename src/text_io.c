@@ -5,6 +5,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "text_io.h"
+
 bool valid(char *text) {
     int len = strlen(text);
     for (int i = 0; i < len; i++)
@@ -119,4 +121,22 @@ bool input_text(char *dest, size_t hossz, SDL_Rect teglalap, SDL_Color hatter, S
     /* igaz jelzi a helyes beolvasast; = ha enter miatt allt meg a ciklus */
     SDL_StopTextInput();
     return enter;
+}
+
+SDL_Rect render_text_centered(SDL_Renderer *renderer, SDL_Rect *container, char *text, TTF_Font *font, SDL_Color text_color, double y_offset) {
+	SDL_Surface *text_s = TTF_RenderUTF8_Solid(font, text, text_color);
+	SDL_Texture *text_t = SDL_CreateTextureFromSurface(renderer, text_s);
+
+	SDL_Rect dst = {
+		container->x + (container->w / 2) - (text_s->w / 2),
+		container->y + y_offset,
+		text_s->w,
+		text_s->h
+	};
+
+	SDL_RenderCopy(renderer, text_t, NULL, &dst);
+	SDL_FreeSurface(text_s);
+	SDL_DestroyTexture(text_t);
+
+	return dst;
 }

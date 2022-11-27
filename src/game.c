@@ -16,7 +16,7 @@
 #include "menu.h"
 #include "button.h"
 #include "particle.h"
-#include "text_input.h"
+#include "text_io.h"
 #include "file_handler.h"
 
 TTF_Font *font_large;
@@ -107,24 +107,6 @@ void update_game(GameState *state) {
 	state->delta_time = (SDL_GetPerformanceCounter() - time)/SDL_GetPerformanceFrequency();
 }
 
-SDL_Rect render_text_centered(SDL_Renderer *renderer, SDL_Rect *container, char *text, TTF_Font *font, SDL_Color text_color, double y_offset) {
-	SDL_Surface *text_s = TTF_RenderUTF8_Solid(font, text, text_color);
-	SDL_Texture *text_t = SDL_CreateTextureFromSurface(renderer, text_s);
-
-	SDL_Rect dst = {
-		container->x + (container->w / 2) - (text_s->w / 2),
-		container->y + y_offset,
-		text_s->w,
-		text_s->h
-	};
-
-	SDL_RenderCopy(renderer, text_t, NULL, &dst);
-	SDL_FreeSurface(text_s);
-	SDL_DestroyTexture(text_t);
-
-	return dst;
-}
-
 void save_state(GameState *state) {
 	SDL_Renderer *renderer = state->camera.renderer;
 	SDL_Rect container = {
@@ -155,7 +137,7 @@ void save_state(GameState *state) {
 	input_rect.y += 50;
 	input_rect.h = 50;
 	SDL_Color input_bg = {0x39, 0x4a, 0x50, 0xff};
-	input_text(score.nev, 15, input_rect, input_bg, text_color, font_small, state->camera.renderer);
+	input_text(score.name, 15, input_rect, input_bg, text_color, font_small, state->camera.renderer);
 	
 	append_score(&score);
 }

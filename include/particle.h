@@ -1,5 +1,5 @@
-#ifndef LIST_H
-#define LIST_H
+#ifndef PARTICLE_H
+#define PARTICLE_H
 
 #include "vector.h"
 #include "camera.h"

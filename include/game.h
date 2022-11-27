@@ -29,6 +29,6 @@ Screen game_events(SDL_Event event, GameState *state);
 void destroy_game(GameState *state);
 void render_game_over(Camera *camera);
 void save_state(GameState *state);
-int landing_quality(Lander *lander);
+double landing_quality(Lander *lander);
 int calculate_score(Lander *state);
 #endif

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include <math.h>
 #include <SDL.h>
 #include <SDL_image.h>
@@ -16,6 +17,7 @@
 #include "button.h"
 #include "particle.h"
 #include "text_input.h"
+#include "file_handler.h"
 
 TTF_Font *font_large;
 TTF_Font *font_small;
@@ -143,11 +145,19 @@ void save_state(GameState *state) {
 	snprintf(score_buff, 20, "%d", calculate_score(&state->lander));
 	render_text_centered(renderer, &container, score_buff, font_small, text_color, 280);
 
-	char result[20];
+	Score score = {
+		.score = calculate_score(&state->lander),
+		.fuel = state->lander.propellant,
+		.quality = landing_quality(&state->lander),
+		.time = (SDL_GetPerformanceCounter() - state->time_started)/SDL_GetPerformanceFrequency(),
+	};
+
 	input_rect.y += 50;
 	input_rect.h = 50;
 	SDL_Color input_bg = {0x39, 0x4a, 0x50, 0xff};
-	input_text(result, 20, input_rect, input_bg, text_color, font_small, state->camera.renderer);
+	input_text(score.nev, 15, input_rect, input_bg, text_color, font_small, state->camera.renderer);
+	
+	append_score(&score);
 }
 
 void render_game_over(Camera *camera) {
@@ -262,9 +272,9 @@ int calculate_score(Lander *lander) {
 	return landing_quality(lander) * lander->propellant;
 }
 
-int landing_quality(Lander *lander) {
+double landing_quality(Lander *lander) {
 	double err = fabs(lander->velocity.x) / 2 + fabs(lander->velocity.y) + abs(lander->rotation) % 360 / 360;
-	return (3 - err);
+	return (3 - err) / 3;
 }
 
 void destroy_game(GameState *state) {

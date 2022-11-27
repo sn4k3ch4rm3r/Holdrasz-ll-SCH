@@ -6,6 +6,8 @@
 #include "game.h"
 #include "menu.h"
 
+#include "debugmalloc.h"
+
 int main(int argc, char* argv[]) {
 	//Set up SDL
 	if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
@@ -59,7 +61,7 @@ int main(int argc, char* argv[]) {
 						case MENU:
 							current_screen = menu_events(event);
 							if(current_screen == GAME)
-								game_state = init_game(renderer);
+								game_state = init_game(renderer, NULL);
 							break;
 						default:
 							break;

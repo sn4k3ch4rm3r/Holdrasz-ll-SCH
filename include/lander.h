@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "vector.h"
 #include "camera.h"
+#include "particle.h"
 
 typedef enum {
 	MAIN_ENGINE,
@@ -22,7 +23,7 @@ typedef struct Lander {
 	double dry_mass;
 	double propellant;
 	bool engines[5];
-	SDL_Texture *texture;
+	List particle_system;
 } Lander;
 
 typedef struct ImpactPoint {

@@ -6,7 +6,7 @@ TARGET := $(BUILDDIR)/bin
 CFLAGS := -Wall
 INCLUDE := -I include/ -I assets/
 LIB := -lSDL2_gfx -lSDL2_image -lSDL2_mixer -lSDL2_ttf
-OBJECTS := main.o game.o vector.o lander.o terrain.o camera.o button.o menu.o
+OBJECTS := main.o game.o vector.o lander.o terrain.o camera.o button.o menu.o particle.o
 
 # Windows
 ifdef OS

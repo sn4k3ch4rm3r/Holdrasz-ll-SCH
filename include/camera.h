@@ -33,4 +33,7 @@ Vector2 get_screen_coordinates(Camera *camera, Vector2 world_coordinates);
 /// @param screen_coordinates the point to bo converted
 /// @return The coordinates of the point in world space
 Vector2 get_world_coordinates(Camera *camera, Vector2 screen_coordinates);
+
+double lerp(double a, double b, double t);
+
 #endif

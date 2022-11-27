@@ -139,7 +139,9 @@ void save_state(GameState *state) {
 	render_text_centered(renderer, &container, "Success", font_large, text_color, 40);
 	SDL_Rect input_rect = render_text_centered(renderer, &container, "Type in your name:", font_small, text_color, 120);
 	render_text_centered(renderer, &container, "[Enter] to confirm", font_small, text_color, 230);
-	render_text_centered(renderer, &container, "Score: 0", font_small, text_color, 280);
+	char score_buff[20];
+	snprintf(score_buff, 20, "%d", calculate_score(&state->lander));
+	render_text_centered(renderer, &container, score_buff, font_small, text_color, 280);
 
 	char result[20];
 	input_rect.y += 50;
@@ -254,6 +256,15 @@ Screen game_events(SDL_Event event, GameState *state) {
 			break;
 	}
 	return GAME;
+}
+
+int calculate_score(Lander *lander) {
+	return landing_quality(lander) * lander->propellant;
+}
+
+int landing_quality(Lander *lander) {
+	double err = fabs(lander->velocity.x) / 2 + fabs(lander->velocity.y) + abs(lander->rotation) % 360 / 360;
+	return (3 - err);
 }
 
 void destroy_game(GameState *state) {

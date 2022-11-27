@@ -10,6 +10,7 @@
 typedef struct GameState {
 	Lander lander;
 	Camera camera;
+	double time_started;
 	double delta_time;
 	double game_over_dealy;
 	bool game_over;
@@ -28,4 +29,6 @@ Screen game_events(SDL_Event event, GameState *state);
 void destroy_game(GameState *state);
 void render_game_over(Camera *camera);
 void save_state(GameState *state);
+int landing_quality(Lander *lander);
+int calculate_score(Lander *state);
 #endif

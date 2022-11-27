@@ -32,7 +32,7 @@ SDL_Texture *dashboard_texture;
 Lander init_lander(SDL_Renderer *renderer) {
 	Lander lander = {
 		.position = {0, 200},
-		.velocity = {100, 0},
+		.velocity = {75, 0},
 		.rotation = -90,
 		.angular_velocity = 0,
 		.dry_mass = dry_mass,

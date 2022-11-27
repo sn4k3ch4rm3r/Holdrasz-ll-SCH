@@ -22,6 +22,7 @@ typedef struct Lander {
 	double angular_velocity;
 	double dry_mass;
 	double propellant;
+	int impact_count;
 	bool engines[5];
 	List particle_system;
 } Lander;
@@ -74,4 +75,6 @@ double get_torque(Vector2 point, Vector2 force);
 /// @param dt Time since the last frame
 /// @return Force applied to the lander by the ground at the given point, {0, 0} if that point is not colliding
 Vector2 get_impact_force(Lander *lander, Vector2 point, double dt);
+void bulk_add_particles(Lander *lander, int count, double size, SDL_Rect area, double life, Vector2 velocity, double angle, SDL_Color start_color, SDL_Color end_color);
+Vector2 lander_to_world_coord(Lander *lander, Vector2 point);
 #endif

@@ -11,6 +11,7 @@ typedef struct GameState {
 	Lander lander;
 	Camera camera;
 	double delta_time;
+	double game_over_dealy;
 	bool game_over;
 	bool successfull;
 	bool destroyed;

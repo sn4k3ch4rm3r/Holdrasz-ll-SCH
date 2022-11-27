@@ -59,8 +59,6 @@ void render_lander(Camera *camera, Lander *lander) {
 	SDL_Point center = V_to_point(V_multiply_const(center_of_mass, camera->zoom));
 	SDL_Rect dst = {screen_coords.x, screen_coords.y, size_px * camera->zoom, size_px * camera->zoom};
 	SDL_RenderCopyEx(camera->renderer, lander_texture, NULL, &dst, lander->rotation, &center, SDL_FLIP_NONE);
-
-	render_particles(camera, &lander->particle_system);
 }
 
 void display_dashboard(Camera *camera, Lander *lander) {
@@ -114,7 +112,10 @@ void display_dashboard(Camera *camera, Lander *lander) {
 		light_dst.x = 330;
 		SDL_RenderCopy(camera->renderer, dashboard_texture, &indicator_light, &light_dst);
 	}
-	///@TODO: Display contact indicator
+	if(lander->impact_count > 0) {
+		light_dst.x = 378;
+		SDL_RenderCopy(camera->renderer, dashboard_texture, &indicator_light, &light_dst);
+	}
 
 	//Display artificial horizon
 	SDL_Rect horizon_rect = {211, 0, 74, 74};
@@ -124,7 +125,20 @@ void display_dashboard(Camera *camera, Lander *lander) {
 	thickLineRGBA(camera->renderer, 368, 88, 408, 88, 4, 0xde, 0x9e, 0x41, 0xff);
 }
 
-void add_engine_particles(Lander *lander, int count, double size, SDL_Rect area, double life, Vector2 velocity, double angle, SDL_Color start_color, SDL_Color end_color) {
+Vector2 lander_to_world_coord(Lander *lander, Vector2 point) {
+	Vector2 center = {center_of_mass.x / PIXELS_PER_METER, -center_of_mass.y / PIXELS_PER_METER};
+	point.y *= -1;
+	point = V_divide_const(point, PIXELS_PER_METER);
+	
+	point = V_subtract(point, center);
+
+	point = V_rotate(point, -lander->rotation);
+	point = V_add(V_add(point, center), lander->position);
+
+	return point;
+}
+
+void bulk_add_particles(Lander *lander, int count, double size, SDL_Rect area, double life, Vector2 velocity, double angle, SDL_Color start_color, SDL_Color end_color) {
 	for(int i = 0; i < count; i++) {
 		Particle p = {
 			.start_color = start_color,
@@ -135,14 +149,7 @@ void add_engine_particles(Lander *lander, int count, double size, SDL_Rect area,
 			.size = size
 		};
 		p.velocity = V_add(lander->velocity, V_rotate(p.velocity, -lander->rotation + (rand() % (int)angle - angle / 2)));
-		Vector2 center = {center_of_mass.x / PIXELS_PER_METER, -center_of_mass.y / PIXELS_PER_METER};
-		p.position.y *= -1;
-		p.position = V_divide_const(p.position, PIXELS_PER_METER);
-		
-		p.position = V_subtract(p.position, center);
-
-		p.position = V_rotate(p.position, -lander->rotation);
-		p.position = V_add(V_add(p.position, center), lander->position);
+		p.position = lander_to_world_coord(lander, p.position);
 		append_particle(&lander->particle_system, p);
 	}
 }
@@ -161,7 +168,7 @@ void update_lander(Lander *lander, double dt) {
 			SDL_Color end_color = {0xe8, 0xc1, 0x70, 0x00};
 			SDL_Rect area = {26, 55, 11, 0};
 			Vector2 velocity = {0, -50};
-			add_engine_particles(lander, 100, 6, area, 0.5, velocity, 120, start_color, end_color);
+			bulk_add_particles(lander, 100, 6, area, 0.5, velocity, 120, start_color, end_color);
 		}
 		if(lander->engines[ROTATE_CW]) {
 			Vector2 left_rcs = {20, 23};
@@ -179,12 +186,12 @@ void update_lander(Lander *lander, double dt) {
 			SDL_Color end_color = {0xc7, 0xcf, 0xcc, 0x00};
 			SDL_Rect area = {19, 23, 2, 0};
 			Vector2 velocity = {0, -100};
-			add_engine_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
+			bulk_add_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
 
 			velocity.y = 100;
 			area.x = 43;
 			area.y = 14;
-			add_engine_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
+			bulk_add_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
 		}
 		if(lander->engines[ROTATE_CCW]) {
 			Vector2 left_rcs = {20, 14};
@@ -202,12 +209,12 @@ void update_lander(Lander *lander, double dt) {
 			SDL_Color end_color = {0xc7, 0xcf, 0xcc, 0x00};
 			SDL_Rect area = {19, 14, 2, 0};
 			Vector2 velocity = {0, 100};
-			add_engine_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
+			bulk_add_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
 
 			velocity.y = -100;
 			area.x = 43;
 			area.y = 23;
-			add_engine_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
+			bulk_add_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
 		}
 		if(lander->engines[LEFT_ENGINE]) {
 			Vector2 rcs = {16, 19};
@@ -222,7 +229,7 @@ void update_lander(Lander *lander, double dt) {
 			SDL_Color end_color = {0xc7, 0xcf, 0xcc, 0x00};
 			SDL_Rect area = {15, 18, 0, 2};
 			Vector2 velocity = {-100, 0};
-			add_engine_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
+			bulk_add_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
 		}
 		if(lander->engines[RIGHT_ENGINE]) {
 			Vector2 rcs = {47, 19};
@@ -237,7 +244,7 @@ void update_lander(Lander *lander, double dt) {
 			SDL_Color end_color = {0xc7, 0xcf, 0xcc, 0x00};
 			SDL_Rect area = {48, 18, 0, 2};
 			Vector2 velocity = {100, 0};
-			add_engine_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
+			bulk_add_particles(lander, 30, 2, area, 0.2, velocity, 120, start_color, end_color);
 		}
 	}
 	force = V_rotate(force, -lander->rotation);
@@ -250,19 +257,34 @@ void update_lander(Lander *lander, double dt) {
 	};
 
 	Vector2 impact_force;
+	lander->impact_count = 0;
 	for(int i = 0; i < 4; i++) {
 		impact_force = get_impact_force(lander, impact_points[i].point, dt);
+
 		if(V_len(impact_force) * dt > 25000 || (V_len(impact_force) != 0 && !impact_points[i].can_collide)) {
 			SDL_Event event;
 			event.type = SDL_USEREVENT;
 			event.user.code = DEATH_EVENT_CODE;
 			SDL_PushEvent(&event);
 		}
+		else {
+			Vector2 impact_world = lander_to_world_coord(lander, impact_points[i].point);
+			if(impact_world.y < get_terrain_height(impact_world.x) + 0.5) {
+				lander->impact_count++;
+			}
+			if(lander->impact_count == 2 && (abs(lander->rotation) % 360 < 10 || abs(lander->rotation) % 360 > 350)) {
+				SDL_Event event;
+				event.type = SDL_USEREVENT;
+				event.user.code = SUCCESS_EVENT_CODE;
+				SDL_PushEvent(&event);
+			}
+		}
+		
 
 		force = V_add(force, impact_force);
 		impact_force = V_rotate(impact_force, lander->rotation);
 		torque += get_torque(impact_points[i].point, impact_force) * dt;
-	}
+	} 
 
 	Vector2 accelartion = V_divide_const(force, lander_total_mass(lander));
 	accelartion.y -= g;
@@ -275,8 +297,6 @@ void update_lander(Lander *lander, double dt) {
 	//update position
 	lander->position = V_add(lander->position, V_multiply_const(lander->velocity, dt));
 	lander->rotation += lander->angular_velocity;
-
-	update_particles(&lander->particle_system, dt);
 }
 
 double lander_total_mass(Lander *lander) {

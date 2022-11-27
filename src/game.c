@@ -14,6 +14,7 @@
 #include "events.h"
 #include "menu.h"
 #include "button.h"
+#include "particle.h"
 
 TTF_Font *font_large;
 TTF_Font *font_small;
@@ -70,21 +71,29 @@ void update_game(GameState *state) {
 	state->camera.height = screen_height;
 
 	//Updates
-	if(!state->game_over)
+	if(!state->game_over) {
 		update_lander(&state->lander, state->delta_time);
+	}
+	update_particles(&state->lander.particle_system, state->delta_time);
 	update_camera(&state->camera, state->lander.position, state->delta_time);
 
 	//Rendering
 	SDL_SetRenderDrawColor(state->camera.renderer, 0,0,0,0xff);
 	SDL_RenderClear(state->camera.renderer);
 
-	if(!state->game_over)
+	if(!state->game_over || state->successfull) {
 		render_lander(&state->camera, &state->lander);
+	}
+	render_particles(&state->camera, &state->lander.particle_system);
 	render_terrain(&state->camera);
 	display_dashboard(&state->camera, &state->lander);
 
-	if(state->game_over)
+	if(state->game_over && state->game_over_dealy <= 0) {
 		render_game_over(&state->camera);
+	}
+	else if(state->game_over) {
+		state->game_over_dealy -= state->delta_time;
+	}
 	
 	SDL_RenderPresent(state->camera.renderer);
 
@@ -168,7 +177,7 @@ Screen game_events(SDL_Event event, GameState *state) {
 			break;
 		}
 		case SDL_MOUSEBUTTONDOWN: 
-			if(event.button.button == SDL_BUTTON_LEFT) {
+			if(state->game_over && event.button.button == SDL_BUTTON_LEFT) {
 				SDL_Point point = {
 					event.button.x,
 					event.button.y,
@@ -194,6 +203,17 @@ Screen game_events(SDL_Event event, GameState *state) {
 			{
 				case DEATH_EVENT_CODE:
 					state->game_over = true;
+					state->game_over_dealy = 2;
+					SDL_Rect explosion_rect = {0, 0, 64, 64};
+					Vector2 explosion_velocity = {70, 0};
+					SDL_Color start_color = {0xda, 0x86, 0x3e, 0xff};
+					SDL_Color end_color = {0xe8, 0xc1, 0x70, 0x00};
+					bulk_add_particles(&state->lander, 1000, 10, explosion_rect, 2, explosion_velocity, 360, start_color, end_color);
+					break;
+				case SUCCESS_EVENT_CODE:
+					state->game_over = true;
+					state->successfull = true;
+					state->game_over_dealy = 2;
 					break;
 			}
 			break;

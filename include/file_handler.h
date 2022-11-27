@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 
+/// @brief Structure to help save and load scoreboard entries
 typedef struct Score {
 	int score;
 	char name[15];

@@ -5,6 +5,7 @@
 
 #include "vector.h"
 
+/// @brief The structure containing the camera
 typedef struct Camera {
 	Vector2 position;
 	double zoom;
@@ -34,6 +35,11 @@ Vector2 get_screen_coordinates(Camera *camera, Vector2 world_coordinates);
 /// @return The coordinates of the point in world space
 Vector2 get_world_coordinates(Camera *camera, Vector2 screen_coordinates);
 
+/// @brief Function to interpolate between two points
+/// @param a point a
+/// @param b point b
+/// @param t time (0-1)
+/// @return a if t = 0 b if t = 1
 double lerp(double a, double b, double t);
 
 #endif

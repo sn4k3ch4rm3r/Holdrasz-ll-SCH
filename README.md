@@ -25,15 +25,28 @@ Ezután be kell lépnünk a projekt mappájába majd a `mingw32-make` parancs se
 
 A forrás fájlok az `src`, a header fájlok pedig az `include` mappában találhatóak. Ezen kívül a fordításhoz szükség van még az SDL2 grafikus könyvtárra. Futtatáshoz pedig fontos, hogy az elkészült futtatható fájl és az `assets` mappa egy mappában legyenek.
 
-## Haladás
+## Játékmenet
 
-A program jelenleg csak a játék fizika szimuláció részét tartalmazza. Tehát ki lehet próbálni a leszállás folyamatát, de játék végállapotai illetve a leszállást segítő műszerek még hiányoznak. A program többi része sem készült még el, tehát a menü és a dicsőséglista még hátra van.
+### Kezdő állapot
+A Hold felszínét oldalnézetben rajzoljuk ki. A leszállóegység a képernyő bal felső sarkában van, nagy sebességgel halad jobbra és kezdetben nincs lefele irányú sebessége.
 
-## Irányítás
+### Leszállás
+A leszállóegységre állandó lefele irányuló gyorsulási erő hat. Feladatunk a kezdeti vízszintes irányú sebesség csökkentése, illetve az ereszkedés sebességének szabályozása, mindezt úgy, hogy kellően egyenletes terepen tudjunk landolni. Ha elég közel kerültünk a felszínhez a játék közelebbi nézetre vált, ezzel segítve a pontosabb manőverezést.
 
+A leszállóegység sebességét a fő hajtómű segítségével szabályozhatjuk. Kisebb manővereket, illetve a leszállóegység forgatását az oldalán található kis hajtóművek segítségével végezhetjük. A hajtóművek által kifejtett erő állandó, azonban ahogy fogy az üzemanyag a leszállóegység egyre könnyebb lesz, így a rá ható erő nagyobb mértékben befolyásolja a gyorsulást.
+
+### A játék vége
+A játék mindenképpen véget ér amikor a leszállóegység eléri a felszínt. A leszállás sikeresnek minősül, ha a leszállóegység vízszintes talajra érkezik, és elég kicsi a vízszintes és függőleges sebessége is. A leszállóegység megsemmisül, vagyis a játékos veszít, ha túl nagy sebességgel csapódik be, vagy nem egyenletes talajra próbál leszállni, vagy túl nagy az elfordulása.
+
+### Irányítás
 A hajtóműveket billentyűk lenyomva tartásával irányíthatjuk.
 - Fő hajtómű: `W`
 - Jobb oldali hajtómű: `A`
 - Bal oldali hajtómű: `D`
 - Jobbra fordulás: `K`
 - Balra fordulás: `J`
+
+A hajtóművek egy, a hajtómű irányával ellentétes irányú erőt fejtenek ki a leszállóegységre.
+
+### Pontozás
+A játékos által szerzett pontokat a leszállás minőségéből (mekkora volt a sebessége, milyen volt az elfordulása) illetve a felhasznált üzemanyag mennyiségéből számítjuk ki.

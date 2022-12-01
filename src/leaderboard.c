@@ -107,7 +107,7 @@ void destroy_leaderboard() {
 	if(score != NULL) {
 		free(score);
 		score = NULL;
+		TTF_CloseFont(font);
+		TTF_CloseFont(button_font);
 	}
-	TTF_CloseFont(font);
-	TTF_CloseFont(button_font);
 }

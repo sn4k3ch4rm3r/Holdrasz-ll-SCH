@@ -19,8 +19,8 @@ int read_scores(Score **scores) {
 	while(fscanf(fp, "%d;%lf;%lf;%lf;%s\n", &leaderboard[count].score, &leaderboard[count].time, &leaderboard[count].fuel, &leaderboard[count].quality, leaderboard[count].name) == 5) {
 		count++;
 		if(count == max) {
-			leaderboard = realloc(leaderboard, sizeof(Score) * max+10);
 			max += 10;
+			leaderboard = realloc(leaderboard, sizeof(Score) * max);
 		}
 	}
 

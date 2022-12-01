@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 
 	//Set up the state
 	Screen current_screen = MENU;
-	GameState game_state;
+	GameState game_state = {.destroyed = true};
 
 	init_menu();
 

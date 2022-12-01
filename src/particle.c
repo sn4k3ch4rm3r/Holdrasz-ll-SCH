@@ -100,4 +100,5 @@ void destroy_particles(List *list) {
 		free(current);
 		current = next;
 	}
+	list->first = NULL;
 }

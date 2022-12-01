@@ -65,12 +65,14 @@ int main(int argc, char* argv[]) {
 								game_state = init_game(renderer, NULL);
 							}
 							else if(current_screen == LEADERBOARD) {
-								destroy_leaderboard();
 								init_leaderboard();
 							}
 							break;
 						case LEADERBOARD:
-							render_leaderboard(renderer);
+							current_screen = leaderboard_events(event);
+							if(current_screen == MENU) {
+								destroy_leaderboard();
+							}
 							break;
 					}
 					break;

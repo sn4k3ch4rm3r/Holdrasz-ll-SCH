@@ -11,19 +11,40 @@
 
 static Score *score = NULL;
 static int count = 0;
+static int start = 0;
 static TTF_Font *font;
 static TTF_Font *button_font;
 
 static Button buttons[] = {
+	{
+		.text = "<",
+		.rect = {
+			.w = 80,
+			.h = 80
+		}
+	},
 	{
 		.text = "Back",
 		.rect = {
 			.w = 200,
 			.h = 80
 		}
+	},
+	{
+		.text = ">",
+		.rect = {
+			.w = 80,
+			.h = 80
+		}
 	}
 };
-static int button_count = 1;
+static int button_count = 3;
+static int offsets[] = {
+	0,
+	90,
+	300
+};
+
 
 void init_leaderboard() {
 	font = TTF_OpenFont("assets/PressStart2P.ttf", 16);
@@ -53,7 +74,6 @@ void render_leaderboard(SDL_Renderer *renderer) {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
 	
-	int start = 0;
 	render_text_centered(renderer, &dst, "Index Score Name", font, text_color, 60);
 	for (int i = start; i < start + 10 && i < count; i++)
 	{
@@ -63,8 +83,9 @@ void render_leaderboard(SDL_Renderer *renderer) {
 	}
 
 	for(int i = 0; i < button_count; i++) {
-		buttons[i].rect.x = dst.w / 2 - buttons[i].rect.w / 2;
 		buttons[i].rect.y = 100 + 10 * offset;
+
+		buttons[i].rect.x = (dst.w - 380) / 2 + offsets[i];
 		render_button(renderer, button_font, buttons + i);
 	}
 
@@ -93,7 +114,13 @@ Screen leaderboard_events(SDL_Event event) {
 				};
 
 				if(SDL_PointInRect(&point, &buttons[0].rect)) {
+					if(start >= 10) start -= 10;
+				}
+				if(SDL_PointInRect(&point, &buttons[1].rect)) {
 					return MENU;
+				}
+				if(SDL_PointInRect(&point, &buttons[2].rect)) {
+					if(start + 10 < count) start += 10;
 				}
 			}
 			break;

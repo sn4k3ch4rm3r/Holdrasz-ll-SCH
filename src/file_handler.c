@@ -25,6 +25,22 @@ int read_scores(Score **scores) {
 	}
 
 	fclose(fp);
+
+	for (int i = 0; i < count-1; i++)
+	{
+		Score *max = leaderboard + i;
+		for (int j = i+1; j < count; j++)
+		{
+			if(leaderboard[j].score > max->score){
+				max = leaderboard + j;
+			}
+		}
+		Score tmp = leaderboard[i];
+		leaderboard[i] = *max;
+		*max = tmp;
+	}
+	
+
 	*scores = leaderboard;
 	return count;
 }
